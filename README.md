@@ -15,6 +15,22 @@ O sistema retorna documentos relevantes da base, apresenta o conjunto de evidên
 
 ---
 
+## 📚 Documentação Técnica
+A documentação detalhada do projeto está disponível na pasta `docs/` (a revisar):
+
+- [Relatórios de Estudo](./docs/study_reports/)
+- [Arquitetura do Sistema](./docs/refs/architecture.md)
+- [Estrutura do Projeto](./docs/refs/project_structure.md)
+<!-- TODO: Mover documentação da metodologia CRISP-DM para docs/ -->
+<!-- TODO: Adicionar documento de Referências dos Notebooks do Google Colab -->
+<!-- TODO: Mover descrição do dataset para docs/ -->
+<!-- TODO: Adicionar documentação do pipeline RAG -->
+<!-- TODO: Adicionar documentação sobre treinamento do Reranker -->
+
+Esses documentos servem como guia técnico durante toda a implementação.
+
+---
+
 # 🧩 **Descrição Geral do Quati Dataset**
 
 O [**Quati**](https://huggingface.co/datasets/unicamp-dl/quati) é um dataset criado para tarefas de **Recuperação de Informação (IR)** em língua portuguesa, contendo consultas elaboradas por falantes nativos e passagens extraídas de sites brasileiros. Ele é estruturado em três componentes principais:
