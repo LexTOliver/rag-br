@@ -21,11 +21,11 @@ A documentação detalhada do projeto está disponível na pasta `docs/` (a revi
 - [Relatórios de Estudo](./docs/study_reports/)
 - [Arquitetura do Sistema](./docs/refs/architecture.md)
 - [Estrutura do Projeto](./docs/refs/project_structure.md)
+- [Google Colab Notebooks](./docs/refs/colab_reference.md)
 <!-- TODO: Mover documentação da metodologia CRISP-DM para docs/ -->
-<!-- TODO: Adicionar documento de Referências dos Notebooks do Google Colab -->
 <!-- TODO: Mover descrição do dataset para docs/ -->
-<!-- TODO: Adicionar documentação do pipeline RAG -->
 <!-- TODO: Adicionar documentação sobre treinamento do Reranker -->
+<!-- TODO: Adicionar documentação do pipeline RAG -->
 
 Esses documentos servem como guia técnico durante toda a implementação.
 
@@ -41,7 +41,12 @@ O [**Quati**](https://huggingface.co/datasets/unicamp-dl/quati) é um dataset cr
 
 O dataset está atualmente disponível em duas versões: uma com 1 milhão de passagens (`quati_1M_passages`) e outra maior, com 10 milhões de passagens (`quati_10M_passages`). Até o momento, foram preparados apenas arquivos qrel de validação para ambas as versões, anotando 50 tópicos com uma média de 97,78 passagens por consulta na versão de 10 milhões de passagens e 38,66 passagens por consulta na versão de 1 milhão de passagens.
 
-Essa estrutura permite treinar e avaliar sistemas completos de IR, modelos supervisionados de reranking e pipelines RAG.
+Algumas alternativas ao Quati podem ser:
+- [Megawika](https://huggingface.co/datasets/hltcoe/megawika): Dataset multilingue com trilhões de artigos da Wikipédia em vários idiomas, incluindo português.
+- [MFAQ](https://huggingface.co/datasets/clips/mfaq): Dataset de perguntas frequentes em múltiplos idiomas, incluindo português, focado em recuperação de respostas curtas.
+- [BeIR](https://huggingface.co/datasets/BeIR/beir): Benchmark de recuperação de informação em inglês com vários datasets no formato ideal para o projeto.
+
+A estrutura do dataset permite avaliar sistemas completos de IR, modelos supervisionados de reranking e pipelines RAG.
 
 ---
 
@@ -64,7 +69,7 @@ Essa estrutura permite treinar e avaliar sistemas completos de IR, modelos super
 |-------|------|-----------|
 | `query_id` | string/int | ID da consulta associada. |
 | `passage_id` | string | ID da passagem correspondente. |
-| `score` | int | Grau de relevância do documento para a consulta (0 ou 1 no dataset). |
+| `score` | int | Grau de relevância do documento para a consulta (0 ou 3 no dataset). |
 
 ---
 
@@ -116,61 +121,57 @@ Como permitir que um usuário recupere informações profundamente relevantes em
 Dataset Quati (HuggingFace):  
 https://huggingface.co/datasets/unicamp-dl/quati
 
-### 2.2 Descrição dos Dados  
+### 2.2 Limpeza Inicial dos Dados
+- Remover textos com caracteres inválidos.  
+- Padronização e normalização básica.  
+- Remover blocos ruidosos (HTML, tags).
+
+### 2.3 Descrição dos Dados  
 - Consultas escritas por falantes nativos.  
-- Passagens de domínio variado (sites em português).  
-- Qrels que indicam quais passagens são relevantes para cada consulta.  
+- Documentos de domínio variado (sites em português).  
+- Qrels que indicam quais documentos são relevantes para cada consulta.  
 - Conjunto adequado para avaliação formal de pipelines de Information Retrieval (IR).
 
-### 2.3 Exploração Inicial (esperada no notebook)  
-- Distribuição de tamanhos das passagens.  
+### 2.4 Exploração Inicial  
+- Distribuição de tamanhos dos documentos.  
 - Exemplos de consultas ambíguas vs diretas.  
 - Análise do número médio de documentos relevantes por query.  
 - Observação da diversidade de temas.  
 
-### 2.4 Problemas Possíveis  
-- Documentos extensos precisam de **chunking**.  
-- Algumas consultas são curtas demais.  
-- Assimetrias entre positivas e negativas.  
-- Variação grande de estilo linguístico.
+### 2.5 Problemas Identificados
+- Pouca quantidade de relações entre consultas e documentos.  
+- Assimetrias entre positivas e negativas, sendo a maioria dos documentos irrelevantes.  
+- Possível ruído em passagens extraídas de páginas web; necessidade de limpeza cuidadosa.
 
 ---
 
 # **3. Data Preparation**
 
-### 3.1 Limpeza
-- Remover textos com caracteres inválidos.  
-- Padronização e normalização básica.  
-- Remover blocos ruidosos (HTML, tags).
-
-### 3.2 Tokenização / Embeddings  
+### 3.1 Tokenização / Embeddings  
 Modelos sugeridos:
 - `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`  
 - `sentence-transformers/all-MiniLM-L6-v2`  
 - `neuralmind/bert-base-portuguese-cased` (convertido para encoder)
 
-### 3.3 Chunking  
+### 3.2 Chunking  
 Quebrar passagens muito longas em segmentos de 256–512 tokens.
 
-### 3.4 Construção do Índice Vetorial  
+### 3.3 Construção do Índice Vetorial  
 - FAISS (Flat, HNSW ou IVFFlat dependendo do experimento).
 - Armazenar IDs + metadados.
 
-### 3.5 Dataset para o Reranker  
-
-O dataset de reranking será preparado utilizando os Qrels, onde score é originalmente binário (0 ou 1), mas será tratado como um alvo contínuo em uma tarefa de regressão.
+### 3.4 Dataset para o Reranker
+O dataset de reranking será preparado utilizando os Qrels, onde score possui originalmente valores entre 0 e 3, mas será tratado como um alvo contínuo em uma tarefa de regressão.
 
 Dessa forma, o modelo aprende a gerar um score contínuo de relevância, permitindo interpretabilidade mais fina e rankings mais expressivos.
 
 Montado a partir dos Qrels: `(query, passage, label)`
 
->Obs.:
-  label = 1 se score=1 em `qrels`;
-  label = 0 se score=0
+>**Obs.:** Os valores de label serão normalizados para o intervalo [0, 1] para facilitar o treinamento e validação do modelo de regressão.
 
 ---
 
-# **4. Modeling**
+# **4. Modelling**
 
 ### 4.1 Baseline – Recuperação por Embeddings  
 Avaliação inicial com FAISS puro:  
