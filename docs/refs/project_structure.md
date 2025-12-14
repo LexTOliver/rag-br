@@ -95,7 +95,7 @@ Documentação técnica modular e relatórios do projeto de estudo.
 
 ### `notebooks/`
 Ambiente exploratório.  
-Ordem numerada reflete o fluxo CRISP-DM.
+Ordem numerada reflete o fluxo CRISP-DM e MLOps.
 
 ### `src/`
 Código de produção, organizado por domínio lógico.

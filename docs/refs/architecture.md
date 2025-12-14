@@ -17,15 +17,27 @@ A arquitetura é composta por cinco grandes módulos:
 
 O fluxo completo:
 
-Dataset → Pré-processamento → Embeddings → FAISS Index
-
-↓
-
-Treino do Reranker
-
-↓
-
-RAG Pipeline (API)
+```
+Dataset Quati
+  ↓
+[Pré-processamento: limpeza, normalização, chunking]
+  ↓
+Chunks + Metadados
+  ↓
+[Geração de Embeddings]
+  ↓
+FAISS Index + Embeddings
+  ↓
+[Treinamento do Reranker (Cross-Encoder)]
+  ↓
+Reranker Supervisionado
+  ↓
+[Pipeline RAG: Query → Retrieval → Reranking → Generation]
+  ↓
+API (FastAPI + Docker)
+  ↓
+Resposta Estruturada (texto + evidências + scores)
+```
 
 ---
 
@@ -39,7 +51,7 @@ Responsável por:
 - Realizar **chunking** em segmentos de 256–512 tokens.
 - Salvar artefatos processados em formato Parquet.
 
-### Artefatos gerados:
+### Artefatos gerados (revisar):
 - `documents.parquet`
 - `chunks.parquet`
 - `mapping.json` (chunk → documento)
