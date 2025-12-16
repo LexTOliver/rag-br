@@ -5,8 +5,8 @@
 - [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1VIwDCIj34QuRYoCelLkT57dHwy4Sts2F?usp=sharing)
 
 ## 02 – Preprocessing (ongoing)
-- `notebooks/02_preprocessing.ipynb`  
-Colab: oncoming...
+- [`notebooks/02_preprocessing.ipynb`](../../notebooks/02_preprocessing.ipynb)
+Colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1JAUhMyNcq3Zl02BmjzOU71fKkxE48TBo?usp=sharing)
 
 ## 03 – Embeddings & Indexing (ongoing)
 - `notebooks/03_embeddings_index.ipynb`
