@@ -21,55 +21,14 @@ A documentação detalhada do projeto está disponível na pasta `docs/` (a revi
 - [Relatórios de Estudo](./docs/study_reports/)
 - [Arquitetura do Sistema](./docs/refs/architecture.md)
 - [Estrutura do Projeto](./docs/refs/project_structure.md)
+- [Descrição dos Datasets](./docs/refs/datasets_description.md)
 - [Google Colab Notebooks](./docs/refs/colab_reference.md)
 <!-- TODO: Mover documentação da metodologia CRISP-DM para docs/ -->
 <!-- TODO: Mover descrição do dataset para docs/ -->
 <!-- TODO: Adicionar documentação sobre treinamento do Reranker -->
 <!-- TODO: Adicionar documentação do pipeline RAG -->
 
-Esses documentos servem como guia técnico durante toda a implementação.
-
----
-
-# 🧩 **Descrição Geral do Quati Dataset**
-
-O [**Quati**](https://huggingface.co/datasets/unicamp-dl/quati) é um dataset criado para tarefas de **Recuperação de Informação (IR)** em língua portuguesa, contendo consultas elaboradas por falantes nativos e passagens extraídas de sites brasileiros. Ele é estruturado em três componentes principais:
-
-1. **Passagens** (documentos)  
-2. **Consultas** (queries)  
-3. **Qrels** (relação consulta–passagem com anotação de relevância)
-
-O dataset está atualmente disponível em duas versões: uma com 1 milhão de passagens (`quati_1M_passages`) e outra maior, com 10 milhões de passagens (`quati_10M_passages`). Até o momento, foram preparados apenas arquivos qrel de validação para ambas as versões, anotando 50 tópicos com uma média de 97,78 passagens por consulta na versão de 10 milhões de passagens e 38,66 passagens por consulta na versão de 1 milhão de passagens.
-
-Algumas alternativas ao Quati podem ser:
-- [Megawika](https://huggingface.co/datasets/hltcoe/megawika): Dataset multilingue com trilhões de artigos da Wikipédia em vários idiomas, incluindo português.
-- [MFAQ](https://huggingface.co/datasets/clips/mfaq): Dataset de perguntas frequentes em múltiplos idiomas, incluindo português, focado em recuperação de respostas curtas.
-- [BeIR](https://huggingface.co/datasets/BeIR/beir): Benchmark de recuperação de informação em inglês com vários datasets no formato ideal para o projeto.
-
-A estrutura do dataset permite avaliar sistemas completos de IR, modelos supervisionados de reranking e pipelines RAG.
-
----
-
-## 🔎 **Dicionário de Dados**
-
-### **1. Passagens** (`quati_1M_passages` / `quati_10M_passages`)
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `passage_id` | string | Identificador único da passagem/documento. |
-| `passage` | string | Texto completo da passagem em português. |
-
-### **2. Topics / Consultas** (`quati_all_topics`, `quati_test_topics`, etc.)
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `query_id` | string/int | Identificador único da consulta. |
-| `query` | string | Pergunta/consulta formulada por falante nativo. |
-
-### **3. Qrels — Relevância** (`quati_1M_qrels` / `quati_10M_qrels`)
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `query_id` | string/int | ID da consulta associada. |
-| `passage_id` | string | ID da passagem correspondente. |
-| `score` | int | Grau de relevância do documento para a consulta (0 ou 3 no dataset). |
+Esses documentos servem como guia técnico do projeto durante toda a implementação.
 
 ---
 
@@ -103,7 +62,7 @@ Como permitir que um usuário recupere informações profundamente relevantes em
 
 ### 1.3 Objetivos de Mineração de Dados  
 - Construir um sistema de **recuperação semântica eficiente**.  
-- Treinar um **modelo supervisionado de reranking** usando o Quati.  
+- Treinar um **modelo supervisionado de reranking**.  
 - Integrar recuperação + reranking + geração de resposta (RAG).  
 - Expor o pipeline completo via **API**.  
 
@@ -161,11 +120,13 @@ Quebrar passagens muito longas em segmentos de 256–512 tokens.
 - Armazenar IDs + metadados.
 
 ### 3.4 Dataset para o Reranker
-O dataset de reranking será preparado utilizando os Qrels, onde score possui originalmente valores entre 0 e 3, mas será tratado como um alvo contínuo em uma tarefa de regressão.
+O reranker será treinado com o dataset MS MARCO (em inglês) por sua escala e qualidade de rótulos, e aplicado em zero-shot ao Quati (em português). Avaliações qualitativas e métricas de ranking foram feitas no Quati para validar adaptabilidade cross-linguística.
+
+O dataset Quati será utilizado para teste e avaliação do reranker, através das Qrels disponíveis que possuem originalmente valores entre 0 e 3 para score de relevância.
 
 Dessa forma, o modelo aprende a gerar um score contínuo de relevância, permitindo interpretabilidade mais fina e rankings mais expressivos.
 
-Montado a partir dos Qrels: `(query, passage, label)`
+A estrutura ideal para os datasets é então: `(query, passage, label)`
 
 >**Obs.:** Os valores de label serão normalizados para o intervalo [0, 1] para facilitar o treinamento e validação do modelo de regressão.
 
