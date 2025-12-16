@@ -2,8 +2,8 @@
 ## **Aplicando CRISP-DM para um problema de negócio**
 
 - **Trabalho Final de Pós-Graduação**
+- **Especialização em Data Science e Machine Learning**
 - **Autor:** Alexandre Oliveira
-- **RA:** 52400856
 
 ---
 
@@ -100,35 +100,41 @@ https://huggingface.co/datasets/unicamp-dl/quati
 ### 2.5 Problemas Identificados
 - Pouca quantidade de relações entre consultas e documentos.  
 - Assimetrias entre positivas e negativas, sendo a maioria dos documentos irrelevantes.  
-- Possível ruído em passagens extraídas de páginas web; necessidade de limpeza cuidadosa.
+- Presença de ruído em passagens; necessidade de limpeza cuidadosa.
 
 ---
 
 # **3. Data Preparation**
 
-### 3.1 Tokenização / Embeddings  
+### 3.1 Pré-processamento dos Textos  
+- Remoção de HTML e tags.  
+- Normalização Unicode.
+
+### 3.2 Tokenização / Embeddings  
 Modelos sugeridos:
 - `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`  
 - `sentence-transformers/all-MiniLM-L6-v2`  
 - `neuralmind/bert-base-portuguese-cased` (convertido para encoder)
 
-### 3.2 Chunking  
+### 3.3 Chunking  
 Quebrar passagens muito longas em segmentos de 256–512 tokens.
 
-### 3.3 Construção do Índice Vetorial  
+### 3.4 Construção do Índice Vetorial  
 - FAISS (Flat, HNSW ou IVFFlat dependendo do experimento).
 - Armazenar IDs + metadados.
 
-### 3.4 Dataset para o Reranker
-O reranker será treinado com o dataset MS MARCO (em inglês) por sua escala e qualidade de rótulos, e aplicado em zero-shot ao Quati (em português). Avaliações qualitativas e métricas de ranking foram feitas no Quati para validar adaptabilidade cross-linguística.
+### 3.5 Dataset para o Reranker
+O reranker será treinado com o dataset MS MARCO (em inglês) por sua escala e qualidade de rótulos, e aplicado em zero-shot ao Quati (em português).
+
+A utilização de embeddings multilíngues visa mitigar a barreira linguística, além da aplicação de avaliações qualitativas e métricas de ranking necessárias para validar adaptabilidade cross-linguística entre o MS MARCO e o Quati.
 
 O dataset Quati será utilizado para teste e avaliação do reranker, através das Qrels disponíveis que possuem originalmente valores entre 0 e 3 para score de relevância.
+
+Outra consideração importante é que o modelo de reranking será treinado como um modelo de **regressão**, prevendo scores contínuos de relevância, sendo necessário a normalização dos labels originais para o intervalo [0, 1].
 
 Dessa forma, o modelo aprende a gerar um score contínuo de relevância, permitindo interpretabilidade mais fina e rankings mais expressivos.
 
 A estrutura ideal para os datasets é então: `(query, passage, label)`
-
->**Obs.:** Os valores de label serão normalizados para o intervalo [0, 1] para facilitar o treinamento e validação do modelo de regressão.
 
 ---
 
