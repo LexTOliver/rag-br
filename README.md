@@ -110,18 +110,18 @@ https://huggingface.co/datasets/unicamp-dl/quati
 - Remoção de HTML e tags.  
 - Normalização Unicode.
 
-### 3.2 Tokenização / Embeddings  
+### 3.2 Tokenização e Chunking
+Quebrar passagens muito longas em segmentos de 256–512 tokens.
+
+### 3.3 Embeddings  
 Modelos sugeridos:
 - `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`  
 - `sentence-transformers/all-MiniLM-L6-v2`  
 - `neuralmind/bert-base-portuguese-cased` (convertido para encoder)
 
-### 3.3 Chunking  
-Quebrar passagens muito longas em segmentos de 256–512 tokens.
-
 ### 3.4 Construção do Índice Vetorial  
 - FAISS (Flat, HNSW ou IVFFlat dependendo do experimento).
-- Armazenar IDs + metadados.
+- Armazenar IDs + metadados em VectorDB ou similar.
 
 ### 3.5 Dataset para o Reranker
 O reranker será treinado com o dataset MS MARCO (em inglês) por sua escala e qualidade de rótulos, e aplicado em zero-shot ao Quati (em português).
