@@ -16,12 +16,12 @@ O sistema retorna documentos relevantes da base, apresenta o conjunto de evidên
 ---
 
 ## 🚀 **Status do Projeto**
-✔️ Análise Exploratória  
-🔄 Data Preparation (limpeza, normalização, seleção de features)  
-🔄 Embeddings e Indexação Vetorial
-⏳ Treinamento de Reranker  
-⏳ Pipeline RAG
-⏳ Deploy via FastAPI + Docker
+- ✔️ Análise Exploratória
+- 🔄 Data Preparation (limpeza, normalização, seleção de features)
+- 🔄 Embeddings e Indexação Vetorial
+- ⏳ Treinamento de Reranker  
+- ⏳ Pipeline RAG
+- ⏳ Deploy via FastAPI + Docker
 
 ---
 
