@@ -59,6 +59,24 @@ Esses documentos servem como guia técnico do projeto durante toda a implementa�
 
 ---
 
+## Instruções de Uso
+Instruções básicas para uso local do projeto:
+```bash
+# Clonar o repositório
+git clone <REPO_URL>
+cd rag-br
+
+# Instalar dependências em um ambiente virtual
+pip install -r requirements.txt
+
+# Executar notebooks no Jupyter ou Google Colab
+jupyter notebook
+```
+
+> O projeto ainda está em desenvolvimento. Em breve, serão disponibilizadas instruções detalhadas para execução local e deploy. Caso tenha interesse em acompanhar o progresso, **recomendo explorar os notebooks no Google Colab (referências [aqui](./docs/refs/colab_reference.md))**.
+
+---
+
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
 ![Datasets](https://img.shields.io/badge/Datasets-Data%20Sources-4ABDAC?style=flat)
 ![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-150458?style=flat&logo=pandas&logoColor=white)
