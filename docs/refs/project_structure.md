@@ -84,7 +84,7 @@ rab-br/
 # 2. Guia de Propósito por Pasta
 
 ### `data/`
-Armazena dados **não versionados** (use `.gitignore`).  
+Armazena dados **não versionados** (`.gitignore`).  
 Separa dados brutos, processados e índices.
 
 ### `models/`
@@ -98,7 +98,13 @@ Ambiente exploratório.
 Ordem numerada reflete o fluxo CRISP-DM e MLOps.
 
 ### `src/`
-Código de produção, organizado por domínio lógico.
+Código de produção, organizado por domínio lógico, contendo:
+- `ingest/`: Ingestão e pré-processamento de dados.
+- `training/`: Treinamento e avaliação do modelo de reranking.
+- `rag/`: Implementação do pipeline RAG (recuperação, reranking, geração).
+- `api/`: Código da API FastAPI para deploy.
+- `utils/`: Funções utilitárias reutilizáveis.
+- `tests/`: Testes unitários e de integração. 
 
 ### `configs/`
 Hiperparâmetros, caminhos, parâmetros de indexação, etc.
