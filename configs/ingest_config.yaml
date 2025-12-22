@@ -1,0 +1,15 @@
+# Configuration file for data ingestion and preprocessing
+# Specifies datasets, versions, splits, and output paths.
+
+number_of_processes: 1  # Number of parallel processes to use during preprocessing
+ms_marco:
+  dataset_name: "microsoft/ms_marco"   # dataset name in Hugging Face Datasets
+  version: "v2.1" # versions: v1.1 or v2.1
+  split: "train"  # splits: train, validation, or test
+  label_divisor: 3.0  # divisor to scale relevance labels
+  output_path: "data/processed/msmarco_reranker_train_v1.parquet"
+
+quati:
+  dataset_name: "unicamp-dl/quati"  # dataset name in Hugging Face Datasets
+  version: "1M" # versions: 1M or 10M
+  output_path: "data/processed/quati_reranker_eval_v1.parquet"
