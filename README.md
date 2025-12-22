@@ -60,7 +60,9 @@ Esses documentos servem como guia técnico do projeto durante toda a implementa�
 ---
 
 ## Instruções de Uso
-Instruções básicas para uso local do projeto:
+Abaixo, seguem as orientações básicas para reprodução do projeto localmente. Recomenda-se a preparação de um ambiente virtual para a instalação das dependências. Ademais, as configurações de cada etapa do pipeline podem ser ajustadas conforme a necessidade através dos arquivos de configuração disponíveis na pasta `configs/`.
+
+### Configuração Local
 ```bash
 # Clonar o repositório
 git clone <REPO_URL>
@@ -68,12 +70,14 @@ cd rag-br
 
 # Instalar dependências em um ambiente virtual
 pip install -r requirements.txt
-
-# Executar notebooks no Jupyter ou Google Colab
-jupyter notebook
 ```
 
-> O projeto ainda está em desenvolvimento. Em breve, serão disponibilizadas instruções detalhadas para execução local e deploy. Caso tenha interesse em acompanhar o progresso, **recomendo explorar os notebooks no Google Colab (referências [aqui](./docs/refs/colab_reference.md))**.
+### Coleta e Preparação dos Dados
+```shell
+make ingest
+```
+
+> O projeto ainda está em desenvolvimento. Aos poucos, serão disponibilizadas instruções detalhadas para execução local e deploy. Caso tenha interesse em acompanhar o progresso, **recomendo explorar os notebooks no Google Colab (referências [aqui](./docs/refs/colab_reference.md))**.
 
 ---
 
