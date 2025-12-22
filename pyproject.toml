@@ -1,0 +1,16 @@
+[project]
+name = "rag-br"
+version = "0.1.0"
+description = "Sistema de Recuperação, Reranking e Resposta Baseada em Documentos em Português com Modelo de Reranking Treinado"
+authors = [
+    { name = "Alexandre Oliveira" }
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "datasets<4.0.0",
+    "numpy",
+    "pandas",
+    "seaborn",
+]

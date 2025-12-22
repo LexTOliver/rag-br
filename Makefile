@@ -12,6 +12,7 @@ SRC := src
 
 help:
 	@echo "Targets disponíveis:"
+	@echo "  make install       -> instala dependências"
 	@echo "  make ingest        -> executa ingestão de dados com pré-processamento"
 	@echo "  make lint          -> lint do código"
 	@echo "  make clean         -> limpa arquivos temporários"
@@ -22,6 +23,9 @@ help:
 # 	@echo "  make evaluate      -> avaliação do reranker"
 # 	@echo "  make api           -> sobe a API"
 # 	@echo "  make test          -> roda testes"
+
+install:
+	pip install -e .
 
 ingest:
 	$(PYTHON) -m $(SRC).ingest.load_dataset
