@@ -13,8 +13,8 @@ import sys
 import yaml
 from argparse import ArgumentParser
 from datasets import load_dataset, Dataset
-from src.ingest.preprocess import preprocess_dataset, format_msmarco, format_quati
-from src.utils.logger import get_logger
+from ingest.preprocess import preprocess_dataset, format_msmarco, format_quati
+from utils.logger import get_logger
 
 logger = get_logger("logs/ingest_step.log")
 
