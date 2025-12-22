@@ -30,7 +30,7 @@ Como permitir que um usuário recupere informações profundamente relevantes em
 Dataset Quati (HuggingFace):  
 https://huggingface.co/datasets/unicamp-dl/quati
 
-### 2.2 Limpeza Inicial dos Dados
+### 2.2 Limpeza Básica dos Dados
 - Remover textos com caracteres inválidos.  
 - Padronização e normalização básica.  
 - Remover blocos ruidosos (HTML, tags).
@@ -56,24 +56,7 @@ https://huggingface.co/datasets/unicamp-dl/quati
 
 # **3. Data Preparation**
 
-### 3.1 Pré-processamento dos Textos  
-- Remoção de HTML e tags.  
-- Normalização Unicode.
-
-### 3.2 Tokenização e Chunking
-Quebrar passagens muito longas em segmentos de 256–512 tokens.
-
-### 3.3 Embeddings  
-Modelos sugeridos:
-- `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`  
-- `sentence-transformers/all-MiniLM-L6-v2`  
-- `neuralmind/bert-base-portuguese-cased` (convertido para encoder)
-
-### 3.4 Construção do Índice Vetorial  
-- FAISS (Flat, HNSW ou IVFFlat dependendo do experimento).
-- Armazenar IDs + metadados em VectorDB ou similar.
-
-### 3.5 Dataset para o Reranker
+### 3.1 Feature Engineering & Seleção de Dados
 O reranker será treinado com o dataset MS MARCO (em inglês) por sua escala e qualidade de rótulos, e aplicado em zero-shot ao Quati (em português).
 
 A utilização de embeddings multilíngues visa mitigar a barreira linguística, além da aplicação de avaliações qualitativas e métricas de ranking necessárias para validar adaptabilidade cross-linguística entre o MS MARCO e o Quati.
@@ -85,6 +68,29 @@ Outra consideração importante é que o modelo de reranking será treinado como
 Dessa forma, o modelo aprende a gerar um score contínuo de relevância, permitindo interpretabilidade mais fina e rankings mais expressivos.
 
 A estrutura ideal para os datasets é então: `(query, passage, label)`
+
+### 3.2 Pré-processamento dos Dados  
+- Textual:
+  - Normalização Unicode.
+  - Remoção de HTML, e-mails, URLs.
+  - Remoção de caracteres especiais.
+  - Remoção de espaços extras.
+  - Conversão para minúsculas.
+- Labels:
+  - Normalização dos scores de relevância para o intervalo [0, 1], para uso em regressão.
+
+### 3.3 Tokenização e Chunking
+Quebrar passagens muito longas em segmentos de 256–512 tokens.
+
+### 3.4 Embeddings  
+Modelos sugeridos:
+- `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`  
+- `sentence-transformers/all-MiniLM-L6-v2`  
+- `neuralmind/bert-base-portuguese-cased` (convertido para encoder)
+
+### 3.5 Construção do Índice Vetorial  
+- FAISS (Flat, HNSW ou IVFFlat dependendo do experimento).
+- Armazenar IDs + metadados em VectorDB ou similar.
 
 ---
 

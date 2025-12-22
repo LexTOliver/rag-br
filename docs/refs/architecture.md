@@ -18,7 +18,7 @@ A arquitetura é composta por cinco grandes módulos:
 O fluxo completo:
 
 ```
-Dataset Quati
+Datasets (Quati, MS MARCO)
   ↓
 [Pré-processamento: limpeza, normalização, chunking]
   ↓
@@ -45,16 +45,14 @@ Resposta Estruturada (texto + evidências + scores)
 
 Responsável por:
 
-- Carregar o dataset Quati da HuggingFace.
+- Carregar os datasets Quati e MS MARCO da HuggingFace.
 - Remover ruídos (HTML, caracteres inválidos).
-- Normalizar textos.
-- Realizar **chunking** em segmentos de 256–512 tokens.
+- Normalizar textos e labels.
 - Salvar artefatos processados em formato Parquet.
 
-### Artefatos gerados (revisar):
-- `documents.parquet`
-- `chunks.parquet`
-- `mapping.json` (chunk → documento)
+### Artefatos gerados:
+- `data/processed/quati_reranker_eval.parquet`
+- `data/processed/msmarco_reranker_train.parquet`
 
 ---
 
