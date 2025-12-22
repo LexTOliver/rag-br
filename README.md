@@ -17,7 +17,7 @@ O sistema retorna documentos relevantes da base, apresenta o conjunto de evidên
 
 ## 🚀 **Status do Projeto**
 - ✔️ Análise Exploratória
-- 🔄 Data Preparation (limpeza, normalização, seleção de features)
+- ✔️ Data Preparation (limpeza, normalização, seleção de features)
 - 🔄 Embeddings e Indexação Vetorial
 - ⏳ Treinamento de Reranker  
 - ⏳ Pipeline RAG
@@ -63,16 +63,20 @@ Esses documentos servem como guia técnico do projeto durante toda a implementa�
 Abaixo, seguem as orientações básicas para reprodução do projeto localmente. Recomenda-se a preparação de um ambiente virtual para a instalação das dependências. Ademais, as configurações de cada etapa do pipeline podem ser ajustadas conforme a necessidade através dos arquivos de configuração disponíveis na pasta `configs/`.
 
 ### Configuração Local
+Clone o repositório e instale as dependências:
+
 ```bash
 # Clonar o repositório
 git clone <REPO_URL>
 cd rag-br
 
 # Instalar dependências em um ambiente virtual
-pip install -r requirements.txt
+make install
 ```
 
 ### Coleta e Preparação dos Dados
+Execute o comando abaixo para iniciar a coleta e pré-processamento dos dados. O arquivo de configuração padrão `configs/ingest_config.yaml` será utilizado, mas pode ser substituído por outro arquivo conforme necessário.
+
 ```shell
 make ingest
 ```
