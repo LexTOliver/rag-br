@@ -16,7 +16,7 @@ from datasets import load_dataset, Dataset
 from src.ingest.preprocess import preprocess_dataset, format_msmarco, format_quati
 from src.utils.logger import get_logger
 
-logger = get_logger("ingestion.log")
+logger = get_logger("logs/ingest_step.log")
 
 
 def load_msmarco(
