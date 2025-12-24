@@ -26,7 +26,7 @@ Chunks + Metadados
   ↓
 [Geração de Embeddings]
   ↓
-FAISS Index + Embeddings
+FAISS Index Flat / Qdrant + Embeddings
   ↓
 [Treinamento do Reranker (Cross-Encoder)]
   ↓
@@ -61,19 +61,21 @@ Responsável por:
 Este módulo gera e armazena representações vetoriais:
 
 - Modelos recomendados:
-  - `paraphrase-multilingual-mpnet-base-v2`
-  - `all-MiniLM-L6-v2`
+  - `intfloat/multilingual-e5-small`
+  - `google/embeddinggemma-300m`
+  - `BGE-Small-v1.5` (somente em inglês)
+  - `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`
 
 Passos:
 
 1. Gerar embeddings dos chunks.
-2. Construir índice FAISS (HNSW ou IVFFlat).
-3. Persistir índice e metadados.
+2. Construir índice FAISS (Index Flat).
+3. Persistir índice e metadados via Qdrant.
 
 ### Artefatos gerados:
 - `embeddings.npy`
 - `faiss.index`
-- `faiss_metadata.parquet`
+- Qdrant VectorDB com embeddings e metadados
 
 ---
 

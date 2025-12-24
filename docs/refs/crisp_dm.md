@@ -30,7 +30,7 @@ Como permitir que um usuário recupere informações profundamente relevantes em
 Dataset Quati (HuggingFace):  
 https://huggingface.co/datasets/unicamp-dl/quati
 
-### 2.2 Limpeza Básica dos Dados
+### 2.2 Limpeza Básica dos Dados para Visualização
 - Remover textos com caracteres inválidos.  
 - Padronização e normalização básica.  
 - Remover blocos ruidosos (HTML, tags).
@@ -63,11 +63,11 @@ A utilização de embeddings multilíngues visa mitigar a barreira linguística,
 
 O dataset Quati será utilizado para teste e avaliação do reranker, através das Qrels disponíveis que possuem originalmente valores entre 0 e 3 para score de relevância.
 
-Outra consideração importante é que o modelo de reranking será treinado como um modelo de **regressão**, prevendo scores contínuos de relevância, sendo necessário a normalização dos labels originais para o intervalo [0, 1].
+Outra consideração importante é que o modelo de reranking será treinado como um modelo de **regressão**, prevendo scores contínuos de relevância, sendo necessário a normalização dos labels originais do Quati para o intervalo [0, 1].
 
 Dessa forma, o modelo aprende a gerar um score contínuo de relevância, permitindo interpretabilidade mais fina e rankings mais expressivos.
 
-A estrutura ideal para os datasets é então: `(query, passage, label)`
+A estrutura ideal para o treinamento do reranker nos datasets é, então: `(query, passage, label)`
 
 ### 3.2 Pré-processamento dos Dados  
 - Textual:
@@ -84,13 +84,15 @@ Quebrar passagens muito longas em segmentos de 256–512 tokens.
 
 ### 3.4 Embeddings  
 Modelos sugeridos:
-- `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`  
-- `sentence-transformers/all-MiniLM-L6-v2`  
-- `neuralmind/bert-base-portuguese-cased` (convertido para encoder)
+- `intfloat/multilingual-e5-small`
+- `google/embeddinggemma-300m`
+- `BGE-Small-v1.5` (somente em inglês)
+- `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`
 
-### 3.5 Construção do Índice Vetorial  
-- FAISS (Flat, HNSW ou IVFFlat dependendo do experimento).
-- Armazenar IDs + metadados em VectorDB ou similar.
+### 3.5 Construção do Índice Vetorial
+- Validação local com FAISS (Index Flat). 
+- Qdrant para indexação e busca vetorial em produção.
+- Armazenar IDs + metadados em VectorDB.
 
 ---
 

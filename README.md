@@ -47,7 +47,7 @@ Esses documentos servem como guia técnico do projeto durante toda a implementa�
 
 1. Usuário envia **uma pergunta** ou **um documento**.  
 2. Sistema gera um **embedding semântico**.  
-3. Busca inicial dos documentos mais similares via **FAISS** (top-k).  
+3. Busca inicial dos documentos mais similares via **Qdrant** (top-k).  
 4. Documentos são reordenados pelo **modelo de reranking treinado** com pares do Quati.  
 5. Os documentos reranqueados e reordenados são passados para um **LLM** para geração de resposta.  
 6. O sistema retorna:  
