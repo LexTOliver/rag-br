@@ -70,7 +70,8 @@ Passos:
 
 1. Gerar embeddings dos chunks.
 2. Construir índice FAISS (Index Flat).
-3. Persistir índice e metadados via Qdrant.
+3. Persistir índice e metadados.
+4. Persistir embeddings em Qdrant (local).
 
 ### Artefatos gerados:
 - `embeddings.npy`
@@ -144,7 +145,9 @@ embeddings/
 
 # 8. Futuras Extensões
 
-- Cache de embeddings e respostas
+- Cache de embeddings e otimização com Qdrant
+- Suporte a múltiplos LLMs
+- Interface web para consultas
 - Monitoramento de latência e throughput
 - Fine-tuning de embeddings
 - Avaliação humana sistemática
