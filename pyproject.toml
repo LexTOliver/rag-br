@@ -14,3 +14,22 @@ dependencies = [
     "pandas",
     "seaborn",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "ruff>=0.14.10",
+]
+
+[tool.ruff]
+line-length = 88 # Tamanho máximo da linha (padrão Black)
+target-version = "py312" # Versão alvo do seu Python
+
+[tool.ruff.lint]
+# "E", "F" são básicos. "I" organiza imports. "UP" moderniza código. "B" detecta bugs comuns.
+select = ["E", "F", "I"] 
+ignore = ["E501"] # Ignora aviso de linha longa se o formatador já resolve
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

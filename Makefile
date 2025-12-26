@@ -3,6 +3,7 @@
 # =========================
 PYTHON := python3
 SRC := src
+SCRIPTS := scripts
 
 .DEFAULT_GOAL := help
 
@@ -28,7 +29,7 @@ install:
 	pip install -e .
 
 ingest:
-	$(PYTHON) -m $(SRC).ingest.load_dataset
+	$(PYTHON) -m $(SCRIPTS).ingest
 
 # chunk:
 # 	$(PYTHON) -m $(SRC).ingest.chunking
@@ -52,7 +53,7 @@ ingest:
 # 	pytest -q
 
 lint:
-	ruff format $(SRC)
+	ruff format $(SRC) $(SCRIPTS)
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +

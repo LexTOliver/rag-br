@@ -1,10 +1,10 @@
 from .load_dataset import load_msmarco, load_quati
 from .preprocess import (
     clean_text,
-    normalize_label,
-    preprocess_dataset,
     format_msmarco,
     format_quati,
+    normalize_label,
+    preprocess_dataset,
 )
 
 __all__ = [
