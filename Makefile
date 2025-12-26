@@ -1,7 +1,7 @@
 # =========================
 # Configurações globais
 # =========================
-PYTHON := python3
+PYTHON := uv run python
 SRC := src
 SCRIPTS := scripts
 
@@ -13,10 +13,11 @@ SCRIPTS := scripts
 
 help:
 	@echo "Targets disponíveis:"
+	@echo "	 make setup			-> Instala o gerenciador de pacotes e inicializa o projeto"
 	@echo "  make install       -> instala dependências"
-	@echo "  make ingest        -> executa ingestão de dados com pré-processamento"
 	@echo "  make lint          -> lint do código"
 	@echo "  make clean         -> limpa arquivos temporários"
+	@echo "  make ingest        -> executa ingestão de dados com pré-processamento"
 # 	@echo "  make chunk         -> chunking de documentos"
 # 	@echo "  make embed         -> geração de embeddings"
 # 	@echo "  make index         -> construção do índice"
@@ -25,11 +26,16 @@ help:
 # 	@echo "  make api           -> sobe a API"
 # 	@echo "  make test          -> roda testes"
 
+
+setup:
+	curl -LsSf https://astral.sh/uv/install.sh | sh
+	uv init
+
 install:
-	pip install -e .
+	uv pip install -e .
 
 ingest:
-	$(PYTHON) -m $(SCRIPTS).ingest
+	$(PYTHON) $(SCRIPTS)/ingest.py
 
 # chunk:
 # 	$(PYTHON) -m $(SRC).ingest.chunking
@@ -53,7 +59,8 @@ ingest:
 # 	pytest -q
 
 lint:
-	ruff format $(SRC) $(SCRIPTS)
+	uv run ruff check $(SRC) $(SCRIPTS) --fix
+	uv run ruff format $(SRC) $(SCRIPTS)
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
