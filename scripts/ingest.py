@@ -15,8 +15,8 @@ from argparse import ArgumentParser
 import yaml
 from datasets import Dataset
 
-from ingest.load_dataset import load_msmarco, load_quati
-from ingest.preprocess import format_msmarco, format_quati, preprocess_dataset
+from ingestion.load_dataset import load_msmarco, load_quati
+from ingestion.preprocess import format_msmarco, format_quati, preprocess_dataset
 from utils.logger import get_logger
 
 logger = get_logger("logs/ingest_step.log")
@@ -141,6 +141,9 @@ def main():
         logger.debug(f"Length of MS MARCO dataset: {len(msmarco_ds)}")
         logger.debug(f"MS MARCO dataset sample: {msmarco_ds[0]}")
         msmarco_ds.to_parquet(msmarco_config["output_path"])
+        logger.info(
+            f"MS MARCO collected and preprocessed successfully. Saved to {msmarco_config['output_path']}."
+        )
     except Exception as e:
         logger.error("Error processing MS MARCO dataset.")
         logger.error(str(e))
@@ -164,6 +167,9 @@ def main():
         logger.debug(f"Length of Quati dataset: {len(quati_ds)}")
         logger.debug(f"Quati dataset sample: {quati_ds[0]}")
         quati_ds.to_parquet(quati_config["output_path"])
+        logger.info(
+            f"Quati collected and preprocessed successfully. Saved to {quati_config['output_path']}."
+        )
     except Exception as e:
         logger.error("Error processing Quati dataset.")
         logger.error(str(e))

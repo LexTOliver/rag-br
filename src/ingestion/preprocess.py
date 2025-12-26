@@ -12,8 +12,9 @@ used both in notebooks and production pipelines.
 
 import re
 import unicodedata
-from datasets import Dataset
 from multiprocessing import cpu_count
+
+from datasets import Dataset
 
 HTML_TAG = re.compile(r"<[^>]+>")
 URL = re.compile(r"https?://\S+|www\.\S+")
