@@ -47,10 +47,10 @@ Esses documentos servem como guia técnico do projeto durante toda a implementa�
 
 1. Usuário envia **uma pergunta** ou **um documento**.  
 2. Sistema gera um **embedding semântico**.  
-3. Busca inicial dos documentos mais similares via **Qdrant** (top-k).  
-4. Documentos são reordenados pelo **modelo de reranking treinado** com pares do Quati.  
+3. Busca inicial dos documentos (Quati dataset) mais similares via **Qdrant** (top-k).  
+4. Documentos são reordenados pelo **modelo de reranking treinado** (MS MARCO).  
 5. Os documentos reranqueados e reordenados são passados para um **LLM** para geração de resposta.  
-6. O sistema retorna:  
+6. O sistema retorna via API:  
    - resposta fundamentada,  
    - lista dos documentos utilizados,  
    - scores de relevância,  
@@ -63,12 +63,15 @@ Esses documentos servem como guia técnico do projeto durante toda a implementa�
 Abaixo, seguem as orientações básicas para reprodução do projeto localmente. Recomenda-se a preparação de um ambiente virtual para a instalação das dependências. Ademais, as configurações de cada etapa do pipeline podem ser ajustadas conforme a necessidade através dos arquivos de configuração disponíveis na pasta `configs/`.
 
 ### Configuração Local
-Clone o repositório e instale as dependências:
+Clone o repositório, configure o ambiente virtual e instale as dependências:
 
 ```bash
 # Clonar o repositório
 git clone <REPO_URL>
 cd rag-br
+
+# Configurar o ambiente virtual
+make setup
 
 # Instalar dependências em um ambiente virtual
 make install

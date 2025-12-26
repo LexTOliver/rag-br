@@ -10,9 +10,10 @@ Este documento descreve a estrutura oficial prevista de diretórios e arquivos d
 rab-br/
 │
 ├── data/
-│ ├── raw/ # Dados brutos
 │ ├── processed/ # Dados limpos/chunkados/curados
-│ └── index/ # Índice FAISS + metadados
+│ ├── index/ # Índice FAISS + metadados + embeddings
+│ ├── embeddings_cache/ # Cache de embeddings
+│ └── qdrant/ # Qdrant DB
 │
 ├── models/
 │ ├── reranker/ # Modelo treinado
@@ -31,8 +32,15 @@ rab-br/
 │ ├── 05_evaluation.ipynb
 │ └── 06_rag_pipeline_tests.ipynb
 │
+├── scripts/  # Scripts de automação e pipeline
+│ ├── ingest.py # Ingestão e pré-processamento
+│ ├── build_index.py # Construção do índice FAISS + Qdrant
+│ ├── train_reranker.py # Treinamento do reranker
+│ ├── evaluate.py # Avaliação do modelo
+│ └── run_api.py # Roda a API FastAPI
+│
 ├── src/
-│ ├── ingest/
+│ ├── ingestion/
 │ │ ├── load_dataset.py
 │ │ ├── preprocess.py
 │ │ ├── chunking.py
@@ -85,7 +93,7 @@ rab-br/
 
 ### `data/`
 Armazena dados **não versionados** (`.gitignore`).  
-Separa dados brutos, processados e índices.
+Separa dados (pré) processados, índices e caches.
 
 ### `models/`
 Armazena modelos treinados, checkpoints e metadados.
@@ -96,6 +104,9 @@ Documentação técnica modular e relatórios do projeto de estudo.
 ### `notebooks/`
 Ambiente exploratório.  
 Ordem numerada reflete o fluxo CRISP-DM e MLOps.
+
+### `scripts/`
+Scripts de automação para tarefas comuns e pipelines.
 
 ### `src/`
 Código de produção, organizado por domínio lógico, contendo:
@@ -132,8 +143,9 @@ Esta organização segue boas práticas usadas em:
 
 Forte separação entre:
 
-- **exploração (notebooks)**  
-- **produção (src)**  
+- **exploração (notebooks)** 
+- **desenvolvimento (scripts)** 
+- **produção (src)**
 - **documentação (docs)**  
 - **artefatos (data/models)**  
 
