@@ -62,6 +62,12 @@ class VectorStore:
             vector_size (int): Tamanho dos vetores na coleção.
             distance_metric (str): Métrica de distância para similaridade ('cosine', 'euclidean', 'dot').
         """
+        # Validate distance metric
+        valid_metrics = ["cosine", "euclidean", "dot"]
+        if distance_metric not in valid_metrics:
+            raise ValueError(f"distance_metric deve ser um de: {valid_metrics}")
+
+        # Check if collection exists; if not, create it
         if self.collection_name not in [
             c.name for c in self.client.get_collections().collections
         ]:
@@ -91,13 +97,12 @@ class VectorStore:
         ]
 
         # Upsert points into the collection
-        self.client.upsert(
-            collection_name=self.collection_name, points=points, wait=True
-        )
+        self.client.upsert(collection_name=self.collection_name, points=points)
 
     def query_search(self, vector: np.ndarray, limit: int = 5):
         """
         Realiza uma busca por vetores similares na coleção, retornando os mais próximos.
+        TODO: Adicionar filtros de payload para buscas mais refinadas.
 
         Params:
             vector (np.ndarray): Vetor de consulta.
@@ -110,16 +115,16 @@ class VectorStore:
             collection_name=self.collection_name, query_vector=vector, limit=limit
         )
 
-    def search_by_id(self, vector_id: str):
+    def search_by_ids(self, vector_ids: List[str]) -> List[Dict[str, Any]]:
         """
-        Busca um vetor na coleção pelo seu ID.
+        Busca vetores na coleção pelos seus IDs.
 
         Params:
-            vector_id (str): ID do vetor a ser buscado.
+            vector_ids (List[str]): Lista de IDs dos vetores a serem buscados.
 
         Returns:
-            Lista de pontos encontrados com o ID especificado.
+            Lista de pontos encontrados com os IDs especificados.
         """
         return self.client.retrieve(
-            collection_name=self.collection_name, ids=[vector_id]
+            collection_name=self.collection_name, ids=vector_ids
         )
