@@ -19,7 +19,7 @@ from ingestion.load_dataset import load_msmarco, load_quati
 from ingestion.preprocess import format_msmarco, format_quati, preprocess_dataset
 from utils.logger import get_logger
 
-logger = get_logger("logs/ingest_step.log")
+logger = get_logger("logs/ingest_pipeline.log")
 
 
 def get_msmarco(
@@ -103,16 +103,13 @@ def create_args() -> ArgumentParser:
     return parser.parse_args()
 
 
-def main():
+def ingest(config: dict):
     """
-    Pipeline de ingestão e pré-processamento dos datasets.
-    Datasets utilizados: MS MARCO e Quati.
-    """
-    # LOAD CONFIGURATION
-    args = create_args()
-    with open(args.config_path, "r") as config_file:
-        config = yaml.safe_load(config_file)
+    Pipeline de ingestão e pré-processamento dos datasets MS MARCO e Quati.
 
+    Params:
+        config (dict): Configurações do pipeline extraídas do arquivo YAML.
+    """
     # Get number of CPU cores for parallel processing
     if "number_of_processes" not in config:
         CPU_COUNT = 1
@@ -176,6 +173,24 @@ def main():
         sys.exit(1)
 
     logger.info("Ingestion and preprocessing pipeline completed successfully.")
+
+
+def main():
+    """
+    Pipeline de ingestão e pré-processamento dos datasets.
+    Datasets utilizados: MS MARCO e Quati.
+    """
+    # LOAD CONFIGURATION
+    args = create_args()
+    with open(args.config_path, "r") as config_file:
+        config = yaml.safe_load(config_file)
+
+    # INGESTION PIPELINE EXECUTION
+    try:
+        ingest(config)
+    except Exception as e:
+        logger.error(f"Error in ingestion pipeline: {e}", exc_info=True)
+        raise
 
 
 if __name__ == "__main__":
