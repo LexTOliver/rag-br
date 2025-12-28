@@ -5,11 +5,10 @@ Provides a class to handle vector store operations such as checking
 for the existence of vectors based on their IDs.
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Literal
 
 import numpy as np
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client import QdrantClient, models
 
 
 class VectorStore:
@@ -35,7 +34,7 @@ class VectorStore:
         self,
         collection_name: str,
         vector_size: int,
-        distance_metric: str = "cosine",
+        distance_metric: Literal["cosine", "euclidean", "dot"] = "cosine",
         path: str = "data/qdrant",
     ):
         """
@@ -73,8 +72,8 @@ class VectorStore:
         ]:
             self.client.create_collection(
                 collection_name=self.collection_name,
-                vectors_config=VectorParams(
-                    size=vector_size, distance=Distance[distance_metric.upper()]
+                vectors_config=models.VectorParams(
+                    size=vector_size, distance=models.Distance[distance_metric.upper()]
                 ),
             )
 
@@ -88,7 +87,7 @@ class VectorStore:
         """
         # Convert dict points to PointStruct
         points = [
-            PointStruct(
+            models.PointStruct(
                 id=point["id"],
                 vector=point["vector"].tolist(),
                 payload=point["payload"],
@@ -128,3 +127,26 @@ class VectorStore:
         return self.client.retrieve(
             collection_name=self.collection_name, ids=vector_ids
         )
+    
+    def document_exists(self, doc_id: str, key: str) -> bool:
+        """
+        Verifica se um documento já possui um vetor indexado no VectorStore.
+        A verificação é feita buscando o ID do documento no payload dos vetores.
+
+        Params:
+            doc_id (str): ID do documento a ser verificado.
+            key (str): Chave no payload onde o ID do documento está armazenado.
+        Returns:
+            bool: True se o documento existir, False caso contrário.
+        """
+        # Run a scroll query to find the document ID in the payload
+        results = self.client.scroll(
+            collection_name=self.collection_name,
+            scroll_filter=models.Filter(
+                must=[models.FieldCondition(key=key, match=models.MatchValue(value=doc_id))]
+            ),
+        limit=1
+        )
+        
+        return results[0] != []
+
