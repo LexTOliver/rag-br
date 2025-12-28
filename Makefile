@@ -18,9 +18,9 @@ help:
 	@echo "  make lint          -> lint do código"
 	@echo "  make clean         -> limpa arquivos temporários"
 	@echo "  make ingest        -> executa ingestão de dados com pré-processamento"
+	@echo "  make index         -> executa vetorização e indexação de documentos"
 # 	@echo "  make chunk         -> chunking de documentos"
 # 	@echo "  make embed         -> geração de embeddings"
-# 	@echo "  make index         -> construção do índice"
 # 	@echo "  make train         -> treino do reranker"
 # 	@echo "  make evaluate      -> avaliação do reranker"
 # 	@echo "  make api           -> sobe a API"
@@ -37,14 +37,14 @@ install:
 ingest:
 	$(PYTHON) $(SCRIPTS)/ingest.py
 
+index:
+	$(PYTHON) $(SCRIPTS)/build_index.py
+
 # chunk:
 # 	$(PYTHON) -m $(SRC).ingest.chunking
 
 # embed:
 # 	$(PYTHON) -m $(SRC).ingest.embed
-
-# index:
-# 	$(PYTHON) -m $(SRC).ingest.build_index
 
 # train:
 # 	$(PYTHON) -m $(SRC).training.train_reranker
