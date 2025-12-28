@@ -203,7 +203,8 @@ POST /rag
 - Uvicorn server  
 
 ### 6.3 Scripts Essenciais Executáveis
-- `ingest.py` – para ingestão e indexação; constrói embeddings, chunks e índice FAISS  
+- `ingest.py` – ingestão e pré-processamento dos dados para treinamento
+- `build_index.py` – vetorização e indexação em Qdrant
 - `train_reranker.py` – treina o modelo supervisionado  
 - `evaluate.py` – executa todas as métricas  
 - `run_api.py` – roda a API completa

@@ -1,6 +1,6 @@
 # 🧱 Arquitetura do Sistema — RAG-BR
 
-Este documento descreve a arquitetura completa do projeto **RAG-BR**, contemplando ingestão, indexação, embeddings, treinamento do modelo de reranking, pipeline RAG e exposição via API.  
+Este documento descreve a arquitetura completa do projeto **RAG-BR**, contemplando ingestão, embeddings, indexação, treinamento do modelo de reranking, pipeline RAG e exposição via API.  
 O objetivo é fornecer uma visão clara, modular e reprodutível da solução, alinhada às práticas modernas de MLOps e engenharia de IA.
 
 ---
@@ -10,12 +10,12 @@ O objetivo é fornecer uma visão clara, modular e reprodutível da solução, a
 A arquitetura é composta por cinco grandes módulos:
 
 1. **Ingestão e Pré-processamento**
-2. **Construção de Embeddings e Indexação Vetorial (FAISS)**
+2. **Construção de Embeddings e Indexação Vetorial (Qdrant)**
 3. **Treinamento do Reranker Supervisionado**
 4. **Pipeline RAG (Retriever → Reranker → Generator)**
 5. **API de Exposição (FastAPI + Docker)**
 
-O fluxo completo:
+O fluxo completo (revisar):
 
 ```
 Datasets (Quati, MS MARCO)
@@ -130,22 +130,29 @@ A API é empacotada com Docker e servida com Uvicorn.
 ---
 
 # 7. Armazenamento e Organização dos Artefatos
+A estrutura do projeto pode ser melhor visualizada em [`project_structure.md`](./project_structure.md). Abaixo, segue um resumo da organização dos principais artefatos:
 
-```
-data/
-raw/
-processed/
-index/
-models/
-reranker/
-embeddings/
+```yaml
+...
+├── data/
+│ ├── processed/ # Dados limpos/chunkados/curados
+│ ├── index/ # Índice FAISS + metadados + embeddings
+│ ├── embeddings_cache/ # Cache de embeddings
+│ └── qdrant/ # Qdrant DB
+│
+├── models/
+│ ├── reranker/ # Modelo treinado
+│ ├── embeddings/ # Modelos de embeddings
+│ └── llm_cache/ # Cache opcional
+│
+...
 ```
 
 ---
 
 # 8. Futuras Extensões
 
-- Cache de embeddings e otimização com Qdrant
+- Melhoria no cache de embeddings e otimização com Qdrant
 - Suporte a múltiplos LLMs
 - Interface web para consultas
 - Monitoramento de latência e throughput

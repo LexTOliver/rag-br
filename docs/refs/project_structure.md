@@ -32,20 +32,24 @@ rab-br/
 │ ├── 05_evaluation.ipynb
 │ └── 06_rag_pipeline_tests.ipynb
 │
-├── scripts/  # Scripts de automação e pipeline
+├── scripts/ # Scripts de automação e pipeline
 │ ├── ingest.py # Ingestão e pré-processamento
-│ ├── build_index.py # Construção do índice FAISS + Qdrant
+│ ├── build_index.py # Vetorização e indexação em Qdrant
 │ ├── train_reranker.py # Treinamento do reranker
 │ ├── evaluate.py # Avaliação do modelo
 │ └── run_api.py # Roda a API FastAPI
 │
 ├── src/
 │ ├── ingestion/
-│ │ ├── load_dataset.py
-│ │ ├── preprocess.py
-│ │ ├── chunking.py
-│ │ ├── embed.py
-│ │ └── build_index.py
+│ │ ├── load_dataset.py # Módulo de carregamento de dados
+│ │ └── preprocess.py # Módulo de pré-processamento
+│ │
+│ ├── vectorize/
+│ │ ├── chunking.py # Módulo de chunking de textos
+│ │ ├── config.py # Configurações de vetorização
+│ │ ├── embed.py # Módulo de geração de embeddings
+│ │ ├── vector_index.py # Módulo mestre de indexação vetorial
+│ │ └── vector_store.py # Módulo de interface com Qdrant
 │ │
 │ ├── training/
 │ │ ├── dataset_builder.py
@@ -93,7 +97,7 @@ rab-br/
 
 ### `data/`
 Armazena dados **não versionados** (`.gitignore`).  
-Separa dados (pré) processados, índices e caches.
+Separa dados (pré) processados, índices, embeddings e cache.
 
 ### `models/`
 Armazena modelos treinados, checkpoints e metadados.
@@ -111,6 +115,7 @@ Scripts de automação para tarefas comuns e pipelines.
 ### `src/`
 Código de produção, organizado por domínio lógico, contendo:
 - `ingest/`: Ingestão e pré-processamento de dados.
+- `vectorize/`: Geração de embeddings e indexação vetorial (Qdrant).
 - `training/`: Treinamento e avaliação do modelo de reranking.
 - `rag/`: Implementação do pipeline RAG (recuperação, reranking, geração).
 - `api/`: Código da API FastAPI para deploy.

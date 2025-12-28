@@ -18,7 +18,7 @@ O sistema retorna documentos relevantes da base, apresenta o conjunto de evidên
 ## 🚀 **Status do Projeto**
 - ✔️ Análise Exploratória
 - ✔️ Data Preparation (limpeza, normalização, seleção de features)
-- 🔄 Embeddings e Indexação Vetorial
+- ✔️ Embeddings e Indexação Vetorial
 - ⏳ Treinamento de Reranker  
 - ⏳ Pipeline RAG
 - ⏳ Deploy via FastAPI + Docker
@@ -34,8 +34,6 @@ A documentação detalhada do projeto está disponível na pasta `docs/` (a revi
 - [Estrutura do Projeto](./docs/refs/project_structure.md)
 - [Descrição dos Datasets](./docs/refs/datasets_description.md)
 - [Google Colab Notebooks](./docs/refs/colab_reference.md)
-<!-- TODO: Mover documentação da metodologia CRISP-DM para docs/ -->
-<!-- TODO: Mover descrição do dataset para docs/ -->
 <!-- TODO: Adicionar documentação sobre treinamento do Reranker -->
 <!-- TODO: Adicionar documentação do pipeline RAG -->
 
@@ -48,7 +46,7 @@ Esses documentos servem como guia técnico do projeto durante toda a implementa�
 1. Usuário envia **uma pergunta** ou **um documento**.  
 2. Sistema gera um **embedding semântico**.  
 3. Busca inicial dos documentos (Quati dataset) mais similares via **Qdrant** (top-k).  
-4. Documentos são reordenados pelo **modelo de reranking treinado** (MS MARCO).  
+4. Documentos recuperados são reordenados pelo **modelo de reranking treinado** (MS MARCO).  
 5. Os documentos reranqueados e reordenados são passados para um **LLM** para geração de resposta.  
 6. O sistema retorna via API:  
    - resposta fundamentada,  
@@ -82,6 +80,13 @@ Execute o comando abaixo para iniciar a coleta e pré-processamento dos dados. O
 
 ```shell
 make ingest
+```
+
+### Vetorização e Indexação
+Para gerar os embeddings e indexar os dados via Qdrant, utilize o comando:
+
+```shell
+make index
 ```
 
 > O projeto ainda está em desenvolvimento. Aos poucos, serão disponibilizadas instruções detalhadas para execução local e deploy. Caso tenha interesse em acompanhar o progresso, **recomendo explorar os notebooks no Google Colab (referências [aqui](./docs/refs/colab_reference.md))**.
