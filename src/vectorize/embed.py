@@ -38,16 +38,14 @@ class Embedder:
     Attributes:
         model (SentenceTransformer): Modelo pré-treinado para geração de embeddings.
         batch_size (int): Tamanho do lote para processamento em batch.
+        enable_local_cache (bool): Habilita ou desabilita o cache local de embeddings.
+        cache_limit_size (int): Tamanho máximo do cache local em bytes.
         local_cache_dir (str): Diretório para cache local de embeddings.
-        enable_local_cache (bool): Habilita ou desabilita o cache local de embeddings
 
     Methods:
         embed(texts: List[str]) -> np.ndarray:
             Gera embeddings para uma lista de textos.
-        embed_with_cache(
-            texts: List[str],
-            vector_store: VectorStore,
-        ) -> Dict[str, np.ndarray]:
+        embed_with_cache(texts: List[str]) -> Dict[str, np.ndarray]:
             Gera embeddings de textos, utilizando cache (local e VectorStore) para evitar recomputação.
         clear_local_cache():
             Limpa todo o cache local de embeddings.
@@ -69,7 +67,9 @@ class Embedder:
             model_config (ModelConfig): Configurações do modelo pré-treinado.
             config (EmbedderConfig): Configurações do Embedder.
         """
-        self.model = SentenceTransformer(model_config.model_name, device=model_config.device)
+        self.model = SentenceTransformer(
+            model_config.model_name, device=model_config.device
+        )
         self.batch_size = config.batch_size
         self.enable_local_cache = config.enable_local_cache
 
@@ -84,6 +84,7 @@ class Embedder:
 
         Params:
             texts (List[str]): Lista de textos a serem embutidos.
+            batch_size (int): Tamanho do lote para processamento em batch.
 
         Returns:
             np.ndarray: Matriz de embeddings onde cada linha corresponde a um texto.
@@ -200,15 +201,11 @@ class Embedder:
 
         # Verify embeddings existing in local cache
         cached_embeddings = (
-            self._load_cached_embeddings(hashes)
-            if self.enable_local_cache
-            else {}
+            self._load_cached_embeddings(hashes) if self.enable_local_cache else {}
         )
 
         # Get remaining hashes to embed
-        hashes_to_embed = [
-            h for h in hashes if h not in cached_embeddings
-        ]
+        hashes_to_embed = [h for h in hashes if h not in cached_embeddings]
 
         # Embed remaining texts in batches
         new_embeddings = {}
