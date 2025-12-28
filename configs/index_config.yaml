@@ -1,32 +1,35 @@
 # Configuration for running the vectorization and indexing pipeline
-# Model settings
-model:
-  model_name: "intfloat/multilingual-e5-small"
-  device: "cpu"  # use "cuda" for GPU acceleration, if available
+vector_index:
+  # Model settings
+  model:
+    model_name: "intfloat/multilingual-e5-small"
+    device: "cpu"  # use "cuda" for GPU acceleration, if available
 
-# Chunker settings
-chunker:
-  chunk_size: 256   # Size of each text chunk
-  overlap: 64   # Overlap between chunks
+  # Chunker settings
+  chunker:
+    chunk_size: 256   # Size of each text chunk
+    overlap: 64   # Overlap between chunks
 
-# Embedder settings
-embedder:
-  batch_size: 32    # Number of texts to embed in one batch
-  enable_local_cache: False    # Enable local caching of embeddings
-  local_cache_dir: "data/embeddings_cache"    # Directory for local cache
+  # Embedder settings
+  embedder:
+    batch_size: 32    # Number of texts to embed in one batch
+    cache_limit_size: 100000   # Maximum Bytes for local cache
+    enable_local_cache: True    # Enable local caching of embeddings
+    local_cache_dir: "data/embeddings_cache"    # Directory for local cache
 
-# VectorStore settings
-vector_store:
-  collection_name: "quati_chunks"   # Name of the collection in the vector store
-  path: "data/qdrant"   # Path to store the vector database
+  # VectorStore settings
+  vector_store:
+    collection_name: "quati_chunks"   # Name of the collection in the vector store
+    path: "data/qdrant"   # Path to store the vector database  
 
 # Indexing settings
 indexing:
   source: "parquet"  # Source type: parquet, HF_dataset, etc.
-  dataset:    # If parquet, specify the path to the file; if HF_dataset, specify dataset name and version
-    data_path: "data/processed/quati_reranker_eval_v1.parquet"  # Path to the data
+  data_path: "data/processed/quati_reranker_eval_v1.parquet"  # Path to the data
+  # version: "v1"  # Version of the dataset
   batch_size: 100  # How many documents to process at once
   id_field: "passage_id"  # Unique identifier for each document
   text_field: "passage"  # Field containing the text to be chunked and embedded
-  # metadata_fields:  # Metadata fields to extract (useful for filtering/searching and retrieval)
-    # - url_source, if available, for example
+  # metadata_fields: ["url", "title", "publication_date"]  # Metadata fields to extract (useful for filtering/searching and retrieval)
+  force_reindex: false  # Whether to reindex all documents, even if they already exist in the vector store
+  skip_existing: true  # Whether to skip documents that already have embeddings in the vector store

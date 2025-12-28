@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 from ingestion.load_dataset import load_parquet_dataset
 from utils.logger import get_logger
-from vectorize.config import VectorIndexConfig
+from vectorize.config import IndexingConfig, VectorIndexConfig
 from vectorize.vector_index import VectorIndex
 
 logger = get_logger("logs/build_index_pipeline.log", level=logging.INFO)
@@ -56,22 +56,22 @@ def load_quati_documents(indexing_config: Dict[str, str]) -> Dataset:
     """
     try:
         # Get dataset configuration
-        dataset_config = indexing_config["dataset"]
+        data_path = indexing_config["data_path"]
         source = indexing_config["source"]
 
         # Load dataset based on source type
         if source == "parquet":  # Load from Parquet file
-            dataset = load_parquet_dataset(dataset_config["data_path"])
-        elif source == "HF dataset":  # Load from Hugging Face dataset
+            dataset = load_parquet_dataset(data_path)
+        elif source == "hf":  # Load from Hugging Face dataset
             dataset = load_dataset(
-                dataset_config["dataset_name"],
-                f"quati_{dataset_config['version']}_passages",
-            )[f"quati_{dataset_config['version']}_passages"]
+                indexing_config["dataset_name"],
+                f"quati_{indexing_config['version']}_passages",
+            )[f"quati_{indexing_config['version']}_passages"]
         else:
             raise ValueError(f"Unsupported data source: {source}")
     except Exception as e:
         logger.error(f"Error loading Quati documents: {e}", exc_info=True)
-        logger.error(f"Dataset config: {dataset_config}, Source: {source}")
+        logger.error(f"Dataset config: {indexing_config}, Source: {source}")
         logger.error(
             "Please ensure the dataset is available and the source type is correct."
         )
@@ -96,42 +96,55 @@ def build_index(config: dict):
         config (dict): Configurations for the pipeline extracted from the YAML file.
     """
     # Load configuration
-    index_config = VectorIndexConfig.from_dict(config)
+    vector_index_config = VectorIndexConfig.from_dict(config["vector_index"])
+    indexing_config = IndexingConfig.from_dict(config["indexing"])
 
     # Initialize VectorIndex
-    vector_index = VectorIndex(config=index_config)
+    vector_index = VectorIndex()
+    vector_index.initialize(vector_index_config)
 
     # Load documents from Quati dataset
-    logger.info("Loading Quati dataset...")
-    dataset = load_quati_documents(vector_index.indexing.__dict__)
+    logger.info(f"Loading Quati dataset from source: {indexing_config.source}, path: {indexing_config.data_path}.")
+    dataset = load_quati_documents(indexing_config=indexing_config.to_dict())
     total_docs = len(dataset)
     logger.info(f"Loaded {total_docs} documents from Quati dataset.")
 
     # Calculate total number of batches for tqdm
     total_batches = (
-        total_docs + vector_index.indexing.batch_size - 1
-    ) // vector_index.indexing.batch_size
+        total_docs + indexing_config.batch_size - 1
+    ) // indexing_config.batch_size
 
     # Index documents
-    indexed_count = 0
+    doc_count = 0
+    indexed_doc_count = 0
+    skipped_doc_count = 0
+    error_doc_count = 0
+    indexed_chunk_count = 0
     batch = []
 
     # Iterate over batches of documents for indexing
+    logger.info("Starting indexing process...")
+    logger.info("Indexing configuration:")
+    logger.info(f"Force reindex: {indexing_config.force_reindex}")
+    logger.info(f"Skip existing: {indexing_config.skip_existing}")
+    logger.info(f"Batch size: {indexing_config.batch_size}")
+    if vector_index.embedder.enable_local_cache:
+        logger.info("Local cache for embeddings is enabled.")
     with tqdm(
         total=total_batches,
         desc="Indexing documents",
         unit="batch",
     ) as pbar:
-        for batch in dataset.iter(batch_size=vector_index.indexing.batch_size):
+        for batch in dataset.iter(batch_size=indexing_config.batch_size):
             # -- Process each document in the batch --
-            batch_size = len(batch[vector_index.indexing.id_field])
+            batch_size = len(batch[indexing_config.id_field])
             for i in range(batch_size):
                 # Extract document data
-                doc_id = str(batch[vector_index.indexing.id_field][i])
-                text = batch[vector_index.indexing.text_field][i]
+                doc_id = str(batch[indexing_config.id_field][i])
+                text = batch[indexing_config.text_field][i]
 
                 # Extract metadata safely
-                metadata_fields = vector_index.indexing.metadata_fields or []
+                metadata_fields = indexing_config.metadata_fields or []
                 metadata = {
                     field: batch[field][i]
                     for field in metadata_fields
@@ -139,24 +152,52 @@ def build_index(config: dict):
                 }
 
                 # Index the document
-                vector_index.index_document(
+                res = vector_index.index_document(
                     doc_id=doc_id,
                     text=text,
                     metadata=metadata,
+                    options=indexing_config,
                 )
-                indexed_count += 1
-                tqdm.write(f"Indexed document ID: {doc_id}")
 
+                # Update results
+                if res.status == "indexed":
+                    indexed_doc_count += 1
+                    indexed_chunk_count += res.chunks_indexed
+                    logger.debug(f"Indexed document ID {doc_id} successfully.")
+                    logger.debug(f"Message: {res.message}.")
+                    logger.debug(f"Chunks indexed for this doc: {res.chunks_indexed}/{res.chunks_total}.")
+                elif res.status == "failed":
+                    error_doc_count += 1
+                    logger.error(f"Failed to index document ID {doc_id}.")
+                    logger.debug(res.message)
+                elif res.status == "skipped":
+                    skipped_doc_count += 1
+                    logger.debug(f"Skipped document ID {doc_id}: {res.message}.")
+                    logger.debug(f"Message: {res.message}.")
+                
+            # Check and clear local cache if enabled
+            if vector_index.embedder.enable_local_cache:
+                cache_limit = vector_index.embedder.cache_limit_size
+                current_cache_size = vector_index.embedder.get_cache_size()
+                if current_cache_size > cache_limit:
+                    logger.info(
+                        f"Local cache size {current_cache_size} bytes exceeds limit of {cache_limit} bytes. Clearing cache."
+                    )
+                    vector_index.embedder.clear_local_cache()
+            
             # Update progress bar after each batch
             pbar.update(1)
+            doc_count += batch_size
 
             # Log progress every 500 documents
-            if indexed_count % 500 == 0:
-                tqdm.write(f"Indexed {indexed_count}/{total_docs} documents")
-                # logger.info(f"Indexed {indexed_count}/{total_docs} documents")
+            if doc_count % 500 == 0:
+                logger.info(f"Indexed {indexed_doc_count}/{total_docs} documents.")
+                logger.info(f"Total chunks indexed so far: {indexed_chunk_count}.")
+                logger.info(f"Total documents skipped so far: {skipped_doc_count}.")
+                logger.info(f"Total documents failed so far: {error_doc_count}.")
 
-    logger.info(f"Indexing complete! Total documents indexed: {indexed_count}")
-
+    logger.info(f"Indexing complete! Total documents indexed: {indexed_doc_count}.")
+    logger.info(f"Total chunks indexed: {indexed_chunk_count}.")
 
 def main():
     """
