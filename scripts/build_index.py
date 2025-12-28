@@ -191,8 +191,8 @@ def build_index(config: dict):
 
             # Log progress every 500 documents
             if doc_count % 500 == 0:
-                logger.info(f"Indexed {indexed_doc_count}/{total_docs} documents.")
                 logger.info(f"Total chunks indexed so far: {indexed_chunk_count}.")
+                logger.info(f"Total documents indexed so far {indexed_doc_count}.")
                 logger.info(f"Total documents skipped so far: {skipped_doc_count}.")
                 logger.info(f"Total documents failed so far: {error_doc_count}.")
 
