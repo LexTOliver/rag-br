@@ -4,6 +4,20 @@ Logger utility functions.
 
 import logging
 
+from tqdm import tqdm
+
+
+class TqdmHandler(logging.Handler):
+    """Custom logging handler that writes to tqdm."""
+    
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            tqdm.write(msg)
+            self.flush()
+        except Exception:
+            self.handleError(record)
+
 
 def get_logger(
     file_name: str = "app.log", level: int = logging.DEBUG
@@ -30,7 +44,8 @@ def get_logger(
         )
 
         # Create a console handler
-        ch = logging.StreamHandler()
+        ch = TqdmHandler()
+        # ch = logging.StreamHandler()
         ch.setLevel(level)
         ch.setFormatter(formatter)
 
