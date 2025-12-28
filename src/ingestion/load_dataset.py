@@ -61,3 +61,17 @@ def load_quati(
     )[f"quati_{version}_qrels"]
 
     return {"passages": passages_ds, "queries": queries_ds, "qrels": qrels_ds}
+
+
+def load_parquet_dataset(file_path: str) -> Dataset:
+    """
+    Carrega um dataset a partir de um arquivo Parquet.
+
+    Params:
+        file_path (str): Caminho para o arquivo Parquet.
+
+    Returns:
+        Dataset: Objeto Dataset carregado.
+    """
+    ds = load_dataset("parquet", data_files=file_path)["train"]
+    return ds
