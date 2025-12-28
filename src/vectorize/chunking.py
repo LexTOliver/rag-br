@@ -9,7 +9,7 @@ from typing import List
 
 from transformers import AutoTokenizer
 
-from vectorize.config import ChunkerConfig
+from vectorize.config import ChunkerConfig, ModelConfig
 
 
 class Chunker:
@@ -31,20 +31,18 @@ class Chunker:
 
     def __init__(
         self,
-        model_name: str,
+        model_config: ModelConfig,
         config: ChunkerConfig,
-        device: str = "cpu",
     ):
         """
         Inicializa o Chunker com um modelo de tokenização específico,
         tamanho de chunk e overlap.
 
         Params:
-            model_name (str): Nome do modelo pré-treinado para tokenização.
+            model_config (ModelConfig): Configurações do modelo pré-treinado para tokenização.
             config (ChunkerConfig): Configurações de chunking (tamanho do chunk e overlap).
-            device (str): Dispositivo para computação ('cpu' ou 'cuda').
         """
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, device=device)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_config.model_name)
         self.chunk_size = config.chunk_size
         self.overlap = config.overlap
 
@@ -72,6 +70,7 @@ class Chunker:
             add_special_tokens=False,
         )["input_ids"]
 
+        # Return empty list if no tokens
         if not tokens:
             return []
 
@@ -84,7 +83,9 @@ class Chunker:
                 continue
 
             # Get chunks
-            chunk = self.tokenizer.decode(chunk_ids, skip_special_tokens=True)
+            chunk = self.tokenizer.decode(
+                chunk_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True
+            )
             if chunk and chunk.strip():  # filtra chunks vazios/brancos
                 chunks.append(chunk)
         return chunks
