@@ -120,7 +120,8 @@ class VectorIndex:
         Params:
             text (str): Texto do documento a ser indexado.
             metadata (Dict): Metadados associados ao documento.
-            options (Optional[IndexingConfig]): Opções adicionais para controle de indexação.
+            skip_existing (bool): Se deve pular a indexação se o documento já existir.
+            force_reindex (bool): Se deve forçar a reindexação mesmo que o documento já exista.
         Returns:
             IndexResult: Resultado da operação de indexação.
         """
