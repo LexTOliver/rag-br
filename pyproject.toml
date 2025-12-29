@@ -1,7 +1,7 @@
 [project]
 name = "rag-br"
 version = "0.1.0"
-description = "Sistema de Recuperação, Reranking e Resposta Baseada em Documentos em Português com Modelo de Reranking Treinado"
+description = "Sistema de Recuperação e Resposta Baseada em Documentos em Português com Modelo de Reranking Treinado."
 authors = [
     { name = "Alexandre Oliveira" }
 ]
