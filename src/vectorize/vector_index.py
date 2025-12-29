@@ -51,7 +51,7 @@ class VectorIndex:
 
         # Initialize Chunker
         self.chunker = Chunker(config.model, config.chunker)
-        
+
         # Initialize Embedder
         self.embedder = Embedder(config.model, config.embedder)
 
@@ -69,8 +69,7 @@ class VectorIndex:
     def _assert_initialized(self):
         if not self._initialized:
             raise RuntimeError(
-                "VectorIndex não inicializado. "
-                "Chame `initialize()` antes de usar."
+                "VectorIndex não inicializado. Chame `initialize()` antes de usar."
             )
 
     def index_document(
@@ -114,7 +113,7 @@ class VectorIndex:
 
         # Start indexing process
         try:
-        # -- Chunking --
+            # -- Chunking --
             chunks = self.chunker.chunk(text)
 
             if not chunks:
@@ -126,11 +125,10 @@ class VectorIndex:
 
             # Define payloads for each chunk
             payloads = []
-            for idx, chunk in enumerate(chunks):
+            for idx, _ in enumerate(chunks):
                 payloads.append(
                     {
                         options.id_field: doc_id,
-                        options.text_field: chunk,
                         "chunk_id": idx,
                         **metadata,
                     }
@@ -140,6 +138,7 @@ class VectorIndex:
             hashes, embeddings = self.embedder.embed_with_cache(chunks)
 
             # -- Upsert into Vector Store --
+            # TODO: Improve id definition: concat doc_id + chunk_id + hash?
             points = []
             for h, emb, payload in zip(hashes, embeddings, payloads):
                 points.append(
@@ -151,13 +150,13 @@ class VectorIndex:
                 )
 
             if not points:
-                    return IndexResult(
-                        doc_id=doc_id,
-                        status="skipped",
-                        message="No points to upsert",
-                        chunks_total=len(chunks),
-                    )
-        
+                return IndexResult(
+                    doc_id=doc_id,
+                    status="skipped",
+                    message="No points to upsert",
+                    chunks_total=len(chunks),
+                )
+
             self.vector_store.upsert(points)
 
             return IndexResult(
@@ -167,7 +166,7 @@ class VectorIndex:
                 chunks_total=len(chunks),
                 chunks_indexed=len(points),
             )
-        
+
         except Exception as e:
             return IndexResult(
                 doc_id=doc_id,
@@ -184,7 +183,7 @@ class VectorIndex:
             top_k (int): Número de resultados a retornar.
         """
         self._assert_initialized()
-        
+
         query_emb = self.embedder.embed([query], batch_size=1)[0]
 
         return self.vector_store.query_search(vector=query_emb, limit=top_k)

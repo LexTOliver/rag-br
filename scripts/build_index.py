@@ -104,7 +104,9 @@ def build_index(config: dict):
     vector_index.initialize(vector_index_config)
 
     # Load documents from Quati dataset
-    logger.info(f"Loading Quati dataset from source: {indexing_config.source}, path: {indexing_config.data_path}.")
+    logger.info(
+        f"Loading Quati dataset from source: {indexing_config.source}, path: {indexing_config.data_path}."
+    )
     dataset = load_quati_documents(indexing_config=indexing_config.to_dict())
     total_docs = len(dataset)
     logger.info(f"Loaded {total_docs} documents from Quati dataset.")
@@ -165,7 +167,9 @@ def build_index(config: dict):
                     indexed_chunk_count += res.chunks_indexed
                     logger.debug(f"Indexed document ID {doc_id} successfully.")
                     logger.debug(f"Message: {res.message}.")
-                    logger.debug(f"Chunks indexed for this doc: {res.chunks_indexed}/{res.chunks_total}.")
+                    logger.debug(
+                        f"Chunks indexed for this doc: {res.chunks_indexed}/{res.chunks_total}."
+                    )
                 elif res.status == "failed":
                     error_doc_count += 1
                     logger.error(f"Failed to index document ID {doc_id}.")
@@ -174,7 +178,7 @@ def build_index(config: dict):
                     skipped_doc_count += 1
                     logger.debug(f"Skipped document ID {doc_id}: {res.message}.")
                     logger.debug(f"Message: {res.message}.")
-                
+
             # Check and clear local cache if enabled
             if vector_index.embedder.enable_local_cache:
                 cache_limit = vector_index.embedder.cache_limit_size
@@ -183,8 +187,9 @@ def build_index(config: dict):
                     logger.info(
                         f"Local cache size {current_cache_size} bytes exceeds limit of {cache_limit} bytes. Clearing cache."
                     )
+                    # TODO: Implement smarter cache management (e.g., LRU or % clear) instead of full clear
                     vector_index.embedder.clear_local_cache()
-            
+
             # Update progress bar after each batch
             pbar.update(1)
             doc_count += batch_size
@@ -198,6 +203,7 @@ def build_index(config: dict):
 
     logger.info(f"Indexing complete! Total documents indexed: {indexed_doc_count}.")
     logger.info(f"Total chunks indexed: {indexed_chunk_count}.")
+
 
 def main():
     """

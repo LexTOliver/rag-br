@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 class TqdmHandler(logging.Handler):
     """Custom logging handler that writes to tqdm."""
-    
+
     def emit(self, record):
         try:
             msg = self.format(record)

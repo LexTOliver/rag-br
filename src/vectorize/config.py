@@ -76,7 +76,7 @@ class EmbedderConfig:
             raise ValueError(
                 "local_cache_dir deve ser definido se enable_local_cache for True"
             )
-        
+
         if self.enable_local_cache and self.cache_limit_size <= 0:
             raise ValueError("cache_limit_size deve ser positivo")
 
@@ -126,7 +126,6 @@ class IndexingConfig:
     batch_size: int = 16
     skip_existing: bool = True
     force_reindex: bool = False
-
 
     def __post_init__(self):
         if self.batch_size <= 0:
@@ -204,12 +203,12 @@ class IndexResult:
         skipped_count (int): Número de documentos que foram pulados.
         errors (List[str]): Lista de mensagens de erro encontradas durante a indexação.
     """
+
     doc_id: str
     status: Literal["indexed", "skipped", "failed"]
     message: Optional[str] = None
     chunks_total: int = 0
     chunks_indexed: int = 0
-
 
 
 @dataclass

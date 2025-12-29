@@ -127,7 +127,7 @@ class VectorStore:
         return self.client.retrieve(
             collection_name=self.collection_name, ids=vector_ids
         )
-    
+
     def document_exists(self, doc_id: str, key: str) -> bool:
         """
         Verifica se um documento já possui um vetor indexado no VectorStore.
@@ -143,10 +143,13 @@ class VectorStore:
         results = self.client.scroll(
             collection_name=self.collection_name,
             scroll_filter=models.Filter(
-                must=[models.FieldCondition(key=key, match=models.MatchValue(value=doc_id))]
+                must=[
+                    models.FieldCondition(
+                        key=key, match=models.MatchValue(value=doc_id)
+                    )
+                ]
             ),
-        limit=1
+            limit=1,
         )
-        
-        return results[0] != []
 
+        return results[0] != []
