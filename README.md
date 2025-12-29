@@ -21,7 +21,7 @@ O sistema retorna documentos relevantes da base, apresenta o conjunto de evidên
 - ✔️ Embeddings e Indexação Vetorial
 - ⏳ Treinamento de Reranker  
 - ⏳ Pipeline RAG
-- ⏳ Deploy via FastAPI + Docker
+- 🔄 Deploy via FastAPI + Docker
 
 ---
 
@@ -83,7 +83,7 @@ make ingest
 ```
 
 ### Vetorização e Indexação
-Para gerar os embeddings e indexar os dados via Qdrant, utilize o comando:
+Para gerar os embeddings e indexar os dados via Qdrant, utilize o comando abaixo. O arquivo de configuração padrão `configs/index_config.yaml` será utilizado, mas pode ser substituído por outro arquivo conforme necessário.
 
 ```shell
 make index
