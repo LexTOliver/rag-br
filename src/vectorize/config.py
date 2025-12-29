@@ -10,6 +10,97 @@ from typing import List, Literal, Optional
 
 
 @dataclass
+class DatasetConfig:
+    """
+    Definição de configurações para datasets para indexação de documentos.
+
+    Attributes:
+        source (Literal["parquet", "hf"]): Tipo de fonte dos dados (ex: parquet, hf, etc.).
+        data_path (str): Caminho para os dados.
+        id_field (str): Nome do campo que contém o ID do documento.
+        text_field (str): Nome do campo que contém o texto do documento.
+        metadata_fields (Optional[List[str]]): Campos de metadados a extrair.
+        version (Optional[str]): Versão do dataset, se aplicável.
+        batch_size (int): Tamanho do lote para processamento em batch.
+    """
+
+    source: Literal["parquet", "hf"]  # Source type: parquet, hf, etc.
+    data_path: str
+    id_field: str
+    text_field: str
+    metadata_fields: Optional[List[str]]
+    version: Optional[str] = None
+    batch_size: int = 16
+    skip_existing: bool = True
+    force_reindex: bool = False
+
+    def __post_init__(self):
+        if not self.source:
+            raise ValueError("source não pode estar vazio")
+
+        valid_sources = ["parquet", "hf"]
+        if self.source not in valid_sources:
+            raise ValueError(f"source deve ser um de: {valid_sources}")
+
+        if not self.data_path:
+            raise ValueError("data_path não pode estar vazio")
+
+        if not self.id_field:
+            raise ValueError("id_field não pode estar vazio")
+
+        if not self.text_field:
+            raise ValueError("text_field não pode estar vazio")
+
+        if self.metadata_fields is None:
+            self.metadata_fields = []
+
+        if self.batch_size <= 0:
+            raise ValueError("batch_size deve ser positivo")
+
+    @classmethod
+    def from_dict(cls, config_dict: dict) -> "DatasetConfig":
+        """
+        Cria uma instância de DatasetConfig a partir de um dicionário de configurações.
+
+        Params:
+            config_dict (dict): Dicionário contendo as configurações.
+
+        Returns:
+            IndexingConfig: Instância configurada.
+        """
+        return cls(
+            source=config_dict.get("source", ""),
+            data_path=config_dict.get("data_path", ""),
+            id_field=config_dict.get("id_field", ""),
+            text_field=config_dict.get("text_field", ""),
+            metadata_fields=config_dict.get("metadata_fields", []),
+            version=config_dict.get("version"),
+            batch_size=config_dict.get("batch_size", 16),
+            skip_existing=config_dict.get("skip_existing", True),
+            force_reindex=config_dict.get("force_reindex", False),
+        )
+
+    def to_dict(self) -> dict:
+        """
+        Converte a configuração para um dicionário.
+
+        Returns:
+            dict: Dicionário representando a configuração.
+        """
+        return {
+            "source": self.source,
+            "data_path": self.data_path,
+            "id_field": self.id_field,
+            "text_field": self.text_field,
+            "metadata_fields": self.metadata_fields,
+            "version": self.version,
+            "batch_size": self.batch_size,
+            "skip_existing": self.skip_existing,
+            "force_reindex": self.force_reindex,
+        }
+
+
+@dataclass
 class ModelConfig:
     """
     Definição de configurações para modelos de embeddings pré-treinados.
@@ -100,115 +191,6 @@ class VectorStoreConfig:
         valid_metrics = ["cosine", "euclidean", "dot"]
         if self.distance_metric not in valid_metrics:
             raise ValueError(f"distance_metric deve ser um de: {valid_metrics}")
-
-
-@dataclass
-class IndexingConfig:
-    """
-    Definição de configurações para o pipeline de indexação.
-
-    Attributes:
-        source (str): Tipo de fonte dos dados (ex: parquet, hf, etc.).
-        data_path (str): Caminho para os dados.
-        id_field (str): Nome do campo que contém o ID do documento.
-        text_field (str): Nome do campo que contém o texto do documento.
-        metadata_fields (list): Campos de metadados a extrair.
-        version (Optional[str]): Versão do dataset, se aplicável.
-        batch_size (int): Tamanho do lote para processamento em batch.
-    """
-
-    source: str  # Source type: parquet, hf, etc.
-    data_path: str
-    id_field: str
-    text_field: str
-    metadata_fields: Optional[List[str]]
-    version: Optional[str] = None
-    batch_size: int = 16
-    skip_existing: bool = True
-    force_reindex: bool = False
-
-    def __post_init__(self):
-        if self.batch_size <= 0:
-            raise ValueError("batch_size deve ser positivo")
-
-        if not self.source:
-            raise ValueError("source não pode estar vazio")
-
-        valid_sources = ["parquet", "hf"]
-        if self.source not in valid_sources:
-            raise ValueError(f"source deve ser um de: {valid_sources}")
-
-        if not self.data_path:
-            raise ValueError("data_path não pode estar vazio")
-
-        if not self.id_field:
-            raise ValueError("id_field não pode estar vazio")
-
-        if not self.text_field:
-            raise ValueError("text_field não pode estar vazio")
-
-        if self.metadata_fields is None:
-            self.metadata_fields = []
-
-    @classmethod
-    def from_dict(cls, config_dict: dict) -> "IndexingConfig":
-        """
-        Cria uma instância de IndexingConfig a partir de um dicionário de configurações.
-
-        Params:
-            config_dict (dict): Dicionário contendo as configurações.
-
-        Returns:
-            IndexingConfig: Instância configurada.
-        """
-        return cls(
-            source=config_dict.get("source", ""),
-            data_path=config_dict.get("data_path", ""),
-            id_field=config_dict.get("id_field", ""),
-            text_field=config_dict.get("text_field", ""),
-            metadata_fields=config_dict.get("metadata_fields", []),
-            version=config_dict.get("version"),
-            batch_size=config_dict.get("batch_size", 16),
-            skip_existing=config_dict.get("skip_existing", True),
-            force_reindex=config_dict.get("force_reindex", False),
-        )
-
-    def to_dict(self) -> dict:
-        """
-        Converte a configuração para um dicionário.
-
-        Returns:
-            dict: Dicionário representando a configuração.
-        """
-        return {
-            "source": self.source,
-            "data_path": self.data_path,
-            "id_field": self.id_field,
-            "text_field": self.text_field,
-            "metadata_fields": self.metadata_fields,
-            "version": self.version,
-            "batch_size": self.batch_size,
-            "skip_existing": self.skip_existing,
-            "force_reindex": self.force_reindex,
-        }
-
-
-@dataclass
-class IndexResult:
-    """
-    Resultado da operação de indexação.
-
-    Attributes:
-        indexed_count (int): Número de documentos indexados com sucesso.
-        skipped_count (int): Número de documentos que foram pulados.
-        errors (List[str]): Lista de mensagens de erro encontradas durante a indexação.
-    """
-
-    doc_id: str
-    status: Literal["indexed", "skipped", "failed"]
-    message: Optional[str] = None
-    chunks_total: int = 0
-    chunks_indexed: int = 0
 
 
 @dataclass

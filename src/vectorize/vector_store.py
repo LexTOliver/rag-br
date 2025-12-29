@@ -98,7 +98,13 @@ class VectorStore:
         # Upsert points into the collection
         self.client.upsert(collection_name=self.collection_name, points=points)
 
-    def query_search(self, vector: np.ndarray, limit: int = 5):
+    def query_search(
+        self,
+        vector: np.ndarray,
+        limit: int = 5,
+        with_vectors: bool = False,
+        with_payload: bool = True,
+    ) -> List[Dict[str, Any]]:
         """
         Realiza uma busca por vetores similares na coleção, retornando os mais próximos.
         TODO: Adicionar filtros de payload para buscas mais refinadas.
@@ -106,50 +112,96 @@ class VectorStore:
         Params:
             vector (np.ndarray): Vetor de consulta.
             limit (int): Número máximo de resultados a serem retornados.
+            with_vectors (bool): Se deve retornar os vetores junto com os resultados.
+            with_payload (bool): Se deve retornar os payloads junto com os resultados.
 
         Returns:
-            Lista de pontos similares encontrados.
+            List[Dict[str, Any]]: Lista de pontos similares encontrados.
         """
-        return self.client.search(
-            collection_name=self.collection_name, query_vector=vector, limit=limit
-        )
+        return self.client.query_points(
+            collection_name=self.collection_name,
+            query=vector.tolist(),
+            limit=limit,
+            with_vectors=with_vectors,
+            with_payload=with_payload,
+        ).points
 
-    def search_by_ids(self, vector_ids: List[str]) -> List[Dict[str, Any]]:
+    def search_by_ids(
+        self,
+        vector_ids: List[str],
+        with_vectors: bool = False,
+        with_payload: bool = True,
+    ) -> List[Dict[str, Any]]:
         """
         Busca vetores na coleção pelos seus IDs.
 
         Params:
             vector_ids (List[str]): Lista de IDs dos vetores a serem buscados.
+            with_vectors (bool): Se deve retornar os vetores junto com os resultados.
+            with_payload (bool): Se deve retornar os payloads junto com os resultados.
 
         Returns:
             Lista de pontos encontrados com os IDs especificados.
         """
         return self.client.retrieve(
-            collection_name=self.collection_name, ids=vector_ids
+            collection_name=self.collection_name,
+            ids=vector_ids,
+            with_vectors=with_vectors,
+            with_payload=with_payload,
         )
 
-    def document_exists(self, doc_id: str, key: str) -> bool:
+    def search_by_filter(
+        self,
+        filter: Dict[str, Any],
+        limit: int = 5,
+        with_vectors: bool = False,
+        with_payload: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """
+        Busca vetores na coleção com base em um filtro de payload.
+
+        Params:
+            filter (Dict[str, Any]): Dicionário representando o filtro de payload.
+            limit (int): Número máximo de resultados a serem retornados.
+            with_vectors (bool): Se deve retornar os vetores junto com os resultados.
+            with_payload (bool): Se deve retornar os payloads junto com os resultados.
+
+        Returns:
+            List[Dict[str, Any]]: Lista de pontos encontrados que correspondem ao filtro.
+        """
+        # Create Qdrant filter from the provided dictionary
+        qdrant_filter = models.Filter(
+            must=[
+                models.FieldCondition(key=key, match=models.MatchValue(value=value))
+                for key, value in filter.items()
+            ]
+        )
+
+        # Perform the scroll query with the constructed filter
+        results = self.client.scroll(
+            collection_name=self.collection_name,
+            scroll_filter=qdrant_filter,
+            limit=limit,
+            with_vectors=with_vectors,
+            with_payload=with_payload,
+        )
+
+        return results[0]
+
+    def document_exists(self, doc_id: str, metadata: Dict[str, Any]) -> bool:
         """
         Verifica se um documento já possui um vetor indexado no VectorStore.
-        A verificação é feita buscando o ID do documento no payload dos vetores.
+        A verificação é feita buscando o hash e metadados associados ao documento.
 
         Params:
             doc_id (str): ID do documento a ser verificado.
-            key (str): Chave no payload onde o ID do documento está armazenado.
+            metadata (Dict[str, Any]): Metadados do documento a ser verificado.
         Returns:
-            bool: True se o documento existir, False caso contrário.
-        """
-        # Run a scroll query to find the document ID in the payload
-        results = self.client.scroll(
-            collection_name=self.collection_name,
-            scroll_filter=models.Filter(
-                must=[
-                    models.FieldCondition(
-                        key=key, match=models.MatchValue(value=doc_id)
-                    )
-                ]
-            ),
-            limit=1,
-        )
 
-        return results[0] != []
+        """
+        # Create filter with doc_id and metadata
+        filter_dict = {"doc_id": doc_id}
+        filter_dict.update(metadata)
+        results = self.search_by_filter(filter=filter_dict, limit=1)
+
+        return results != []

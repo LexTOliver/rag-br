@@ -19,10 +19,10 @@ from tqdm import tqdm
 
 from ingestion.load_dataset import load_parquet_dataset
 from utils.logger import get_logger
-from vectorize.config import IndexingConfig, VectorIndexConfig
+from vectorize.config import DatasetConfig, VectorIndexConfig
 from vectorize.vector_index import VectorIndex
 
-logger = get_logger("logs/build_index_pipeline.log", level=logging.INFO)
+logger = get_logger("logs/build_index_pipeline.log", level=logging.DEBUG)
 
 
 def create_args() -> argparse.ArgumentParser:
@@ -44,7 +44,7 @@ def create_args() -> argparse.ArgumentParser:
     return parser.parse_args()
 
 
-def load_quati_documents(indexing_config: Dict[str, str]) -> Dataset:
+def load_quati_documents(dataset_config: Dict[str, str]) -> Dataset:
     """
     Carrega os documentos do dataset Quati de uma fonte específica e seleciona os dados necessários.
 
@@ -56,22 +56,22 @@ def load_quati_documents(indexing_config: Dict[str, str]) -> Dataset:
     """
     try:
         # Get dataset configuration
-        data_path = indexing_config["data_path"]
-        source = indexing_config["source"]
+        data_path = dataset_config["data_path"]
+        source = dataset_config["source"]
 
         # Load dataset based on source type
         if source == "parquet":  # Load from Parquet file
             dataset = load_parquet_dataset(data_path)
         elif source == "hf":  # Load from Hugging Face dataset
             dataset = load_dataset(
-                indexing_config["dataset_name"],
-                f"quati_{indexing_config['version']}_passages",
-            )[f"quati_{indexing_config['version']}_passages"]
+                dataset_config["dataset_name"],
+                f"quati_{dataset_config['version']}_passages",
+            )[f"quati_{dataset_config['version']}_passages"]
         else:
             raise ValueError(f"Unsupported data source: {source}")
     except Exception as e:
         logger.error(f"Error loading Quati documents: {e}", exc_info=True)
-        logger.error(f"Dataset config: {indexing_config}, Source: {source}")
+        logger.error(f"Dataset config: {dataset_config}, Source: {source}")
         logger.error(
             "Please ensure the dataset is available and the source type is correct."
         )
@@ -79,9 +79,9 @@ def load_quati_documents(indexing_config: Dict[str, str]) -> Dataset:
 
     # Select only necessary columns
     columns_to_keep = [
-        indexing_config["id_field"],
-        indexing_config["text_field"],
-    ] + indexing_config.get("metadata_fields", [])
+        dataset_config["id_field"],
+        dataset_config["text_field"],
+    ] + dataset_config.get("metadata_fields", [])
 
     dataset = dataset.select_columns(columns_to_keep)
 
@@ -97,7 +97,7 @@ def build_index(config: dict):
     """
     # Load configuration
     vector_index_config = VectorIndexConfig.from_dict(config["vector_index"])
-    indexing_config = IndexingConfig.from_dict(config["indexing"])
+    dataset_config = DatasetConfig.from_dict(config["dataset"])
 
     # Initialize VectorIndex
     vector_index = VectorIndex()
@@ -105,16 +105,16 @@ def build_index(config: dict):
 
     # Load documents from Quati dataset
     logger.info(
-        f"Loading Quati dataset from source: {indexing_config.source}, path: {indexing_config.data_path}."
+        f"Loading Quati dataset from source: {dataset_config.source}, path: {dataset_config.data_path}."
     )
-    dataset = load_quati_documents(indexing_config=indexing_config.to_dict())
+    dataset = load_quati_documents(dataset_config=dataset_config.to_dict())
     total_docs = len(dataset)
     logger.info(f"Loaded {total_docs} documents from Quati dataset.")
 
     # Calculate total number of batches for tqdm
     total_batches = (
-        total_docs + indexing_config.batch_size - 1
-    ) // indexing_config.batch_size
+        total_docs + dataset_config.batch_size - 1
+    ) // dataset_config.batch_size
 
     # Index documents
     doc_count = 0
@@ -127,26 +127,28 @@ def build_index(config: dict):
     # Iterate over batches of documents for indexing
     logger.info("Starting indexing process...")
     logger.info("Indexing configuration:")
-    logger.info(f"Force reindex: {indexing_config.force_reindex}")
-    logger.info(f"Skip existing: {indexing_config.skip_existing}")
-    logger.info(f"Batch size: {indexing_config.batch_size}")
+    logger.info(f"Force reindex: {dataset_config.force_reindex}")
+    logger.info(f"Skip existing: {dataset_config.skip_existing}")
+    logger.info(f"Batch size: {dataset_config.batch_size}")
     if vector_index.embedder.enable_local_cache:
         logger.info("Local cache for embeddings is enabled.")
+    else:
+        logger.info("Local cache for embeddings is disabled.")
     with tqdm(
         total=total_batches,
         desc="Indexing documents",
         unit="batch",
     ) as pbar:
-        for batch in dataset.iter(batch_size=indexing_config.batch_size):
+        for batch in dataset.iter(batch_size=dataset_config.batch_size):
             # -- Process each document in the batch --
-            batch_size = len(batch[indexing_config.id_field])
+            batch_size = len(batch[dataset_config.id_field])
             for i in range(batch_size):
                 # Extract document data
-                doc_id = str(batch[indexing_config.id_field][i])
-                text = batch[indexing_config.text_field][i]
+                doc_id = str(batch[dataset_config.id_field][i])
+                text = batch[dataset_config.text_field][i]
 
                 # Extract metadata safely
-                metadata_fields = indexing_config.metadata_fields or []
+                metadata_fields = dataset_config.metadata_fields or []
                 metadata = {
                     field: batch[field][i]
                     for field in metadata_fields
@@ -155,28 +157,34 @@ def build_index(config: dict):
 
                 # Index the document
                 res = vector_index.index_document(
-                    doc_id=doc_id,
                     text=text,
                     metadata=metadata,
-                    options=indexing_config,
+                    skip_existing=dataset_config.skip_existing,
+                    force_reindex=dataset_config.force_reindex,
                 )
 
                 # Update results
                 if res.status == "indexed":
                     indexed_doc_count += 1
                     indexed_chunk_count += res.chunks_indexed
-                    logger.debug(f"Indexed document ID {doc_id} successfully.")
+                    logger.debug(
+                        f"Indexed document ID {doc_id} successfully. Doc hash: {res.doc_id}."
+                    )
                     logger.debug(f"Message: {res.message}.")
                     logger.debug(
                         f"Chunks indexed for this doc: {res.chunks_indexed}/{res.chunks_total}."
                     )
                 elif res.status == "failed":
                     error_doc_count += 1
-                    logger.error(f"Failed to index document ID {doc_id}.")
+                    logger.error(
+                        f"Failed to index document ID {doc_id}. Doc hash: {res.doc_id}."
+                    )
                     logger.debug(res.message)
                 elif res.status == "skipped":
                     skipped_doc_count += 1
-                    logger.debug(f"Skipped document ID {doc_id}: {res.message}.")
+                    logger.debug(
+                        f"Skipped document ID {doc_id}. Doc hash: {res.doc_id}."
+                    )
                     logger.debug(f"Message: {res.message}.")
 
             # Check and clear local cache if enabled

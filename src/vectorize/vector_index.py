@@ -5,12 +5,47 @@ Provides a class that orchestrates chunking, embedding, and storage of text data
 into a vector store for efficient retrieval.
 """
 
-from typing import Dict, Optional
+import hashlib
+from dataclasses import dataclass
+from typing import Dict, Literal, Optional
 
 from vectorize.chunking import Chunker
-from vectorize.config import IndexingConfig, IndexResult, VectorIndexConfig
+from vectorize.config import VectorIndexConfig
 from vectorize.embed import Embedder
 from vectorize.vector_store import VectorStore
+
+
+def _hash_document(text: str) -> str:
+    """
+    Gera um hash MD5 para o texto do documento fornecido.
+
+    Params:
+        text (str): Texto do documento a ser hasheado.
+
+    Returns:
+        str: Hash MD5 do texto.
+    """
+    return hashlib.md5(text.encode("utf-8")).hexdigest()
+
+
+@dataclass
+class IndexResult:
+    """
+    Resultado da operação de indexação.
+
+    Attributes:
+        doc_id (str): ID do documento indexado, criado a partir do hash do texto.
+        status (Literal["indexed", "skipped", "failed"]): Status da indexação
+        message (Optional[str]): Mensagem adicional sobre o resultado da indexação.
+        chunks_total (int): Número total de chunks gerados para o documento.
+        chunks_indexed (int): Número de chunks efetivamente indexados.
+    """
+
+    doc_id: str
+    status: Literal["indexed", "skipped", "failed"]
+    message: Optional[str] = None
+    chunks_total: int = 0
+    chunks_indexed: int = 0
 
 
 class VectorIndex:
@@ -74,16 +109,15 @@ class VectorIndex:
 
     def index_document(
         self,
-        doc_id: str,
         text: str,
         metadata: Dict,
-        options: Optional[IndexingConfig] = None,
+        skip_existing: bool = True,
+        force_reindex: bool = False,
     ) -> IndexResult:
         """
         Indexa um único documento com base no texto e metadados fornecidos.
 
         Params:
-            doc_id (str): Identificador único do documento.
             text (str): Texto do documento a ser indexado.
             metadata (Dict): Metadados associados ao documento.
             options (Optional[IndexingConfig]): Opções adicionais para controle de indexação.
@@ -93,18 +127,21 @@ class VectorIndex:
         # Assert initialization of components
         self._assert_initialized()
 
-        # Get options or use defaults
-        options = options or IndexingConfig()
+        # Validate text
         if not text or not text.strip():
             return IndexResult(
-                doc_id=doc_id,
+                doc_id="N/A",
                 status="skipped",
                 message="Empty or whitespace-only text",
             )
 
+        # Generate document ID based on text hash
+        # TODO: Improve document ID strategy if needed
+        doc_id = _hash_document(text)
+
         # Check if document is already indexed
-        if options.skip_existing and not options.force_reindex:
-            if self.vector_store.document_exists(doc_id, options.id_field):
+        if skip_existing and not force_reindex:
+            if self.vector_store.document_exists(doc_id, metadata):
                 return IndexResult(
                     doc_id=doc_id,
                     status="skipped",
@@ -124,12 +161,14 @@ class VectorIndex:
                 )
 
             # Define payloads for each chunk
+            # TODO: Remover chunk_text e text; manter apenas as referências dos documentos,
             payloads = []
-            for idx, _ in enumerate(chunks):
+            for idx, chunk in enumerate(chunks):
                 payloads.append(
                     {
-                        options.id_field: doc_id,
+                        "doc_id": doc_id,
                         "chunk_id": idx,
+                        "chunk_text": chunk,
                         **metadata,
                     }
                 )
@@ -169,7 +208,7 @@ class VectorIndex:
 
         except Exception as e:
             return IndexResult(
-                doc_id=doc_id,
+                doc_id=doc_id if "doc_id" in locals() else "N/A",
                 status="failed",
                 message=f"{e.__class__.__name__}: {str(e)}",
             )
@@ -181,6 +220,9 @@ class VectorIndex:
         Params:
             query (str): Texto da query para busca.
             top_k (int): Número de resultados a retornar.
+
+        Returns:
+            Lista de pontos similares encontrados.
         """
         self._assert_initialized()
 

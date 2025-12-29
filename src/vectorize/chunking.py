@@ -50,11 +50,56 @@ class Chunker:
         """
         Divide um texto em trechos (chunks) a partir de tokens, mantendo um overlap entre os trechos.
         Cada trecho é representado por uma lista de tokens contendo até max_tokens palavras.
+        Os chunks são extraídos diretamente do texto original.
 
         Params:
             text (str): Texto a ser dividido em trechos.
-            max_tokens (int): Número máximo de tokens por trecho.
-            overlap (int): Número de tokens de overlap entre os trechos.
+
+        Returns:
+            List[str]: Lista de trechos do texto.
+        """
+        # Return empty list if text is empty or whitespace
+        if not text or not text.strip():
+            return []
+
+        # Create tokens with offsets
+        tokens = self.tokenizer(
+            text,
+            return_offsets_mapping=True,
+            add_special_tokens=False,
+        )
+
+        # Return empty list if no tokens
+        if not tokens["input_ids"]:
+            return []
+
+        # Extract input IDs and offset mappings
+        input_ids = tokens["input_ids"]
+        offsets = tokens["offset_mapping"]
+
+        # Set chunks
+        chunks = []
+        start = 0
+        while start < len(input_ids):
+            end = start + self.chunk_size
+            chunk_offsets = offsets[start:end]
+            char_start = chunk_offsets[0][0]
+            char_end = chunk_offsets[-1][1]
+            chunk = text[char_start:char_end]
+            if chunk and chunk.strip():  # filtra chunks vazios/brancos
+                chunks.append(chunk)
+            start += self.chunk_size - self.overlap
+
+        return chunks
+
+    def chunk_decode(self, text: str) -> List[str]:
+        """
+        Divide um texto em trechos (chunks) a partir de tokens, mantendo um overlap entre os trechos.
+        Cada trecho é representado por uma lista de tokens contendo até max_tokens palavras.
+        Os chunks são decodificados de volta para strings.
+
+        Params:
+            text (str): Texto a ser dividido em trechos.
 
         Returns:
             List[str]: Lista de trechos do texto.
