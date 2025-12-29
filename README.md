@@ -89,6 +89,15 @@ Para gerar os embeddings e indexar os dados via Qdrant, utilize o comando abaixo
 make index
 ```
 
+### API Local
+Para iniciar a API FastAPI localmente, utilize o comando abaixo. A API estará disponível em `http://localhost:8000`, a documentação interativa estará em `http://localhost:8000/docs` e caso queira modificar as configurações, o arquivo padrão `.env.example` editado conforme necessário (sugiro renomeá-lo para `.env` e modificar a chamada em [`src/api/core/settings.py`](./src/api/core/settings.py) para evitar vazamento de credenciais sensíveis).
+
+```shell
+make api-dev
+```
+
+> O pipeline RAG ainda não está integrado com a API, aguarde atualizações.
+
 > O projeto ainda está em desenvolvimento. Aos poucos, serão disponibilizadas instruções detalhadas para execução local e deploy. Caso tenha interesse em acompanhar o progresso, **recomendo explorar os notebooks no Google Colab (referências [aqui](./docs/refs/colab_reference.md))**.
 
 ---

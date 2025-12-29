@@ -19,11 +19,11 @@ help:
 	@echo "  make clean         -> limpa arquivos temporários"
 	@echo "  make ingest        -> executa ingestão de dados com pré-processamento"
 	@echo "  make index         -> executa vetorização e indexação de documentos"
+	@echo "  make api-dev       -> inicia a API FastAPI localmente"
 # 	@echo "  make chunk         -> chunking de documentos"
 # 	@echo "  make embed         -> geração de embeddings"
 # 	@echo "  make train         -> treino do reranker"
 # 	@echo "  make evaluate      -> avaliação do reranker"
-# 	@echo "  make api           -> sobe a API"
 # 	@echo "  make test          -> roda testes"
 
 
@@ -39,6 +39,9 @@ ingest:
 
 index:
 	$(PYTHON) $(SCRIPTS)/build_index.py
+
+api-dev:
+	uv run --env-file .env.example fastapi dev src/api/main.py
 
 # chunk:
 # 	$(PYTHON) -m $(SRC).ingest.chunking
