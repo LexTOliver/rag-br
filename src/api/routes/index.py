@@ -33,4 +33,6 @@ def index_document(
     message = f"Document {res.status}. {res.message or ''}".strip()
 
     # Return response
-    return IndexResponse(doc_id=res.doc_id, status=status, message=message, num_chunks=res.chunks_indexed)
+    return IndexResponse(
+        doc_id=res.doc_id, status=status, message=message, num_chunks=res.chunks_indexed
+    )
