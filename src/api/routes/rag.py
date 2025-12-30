@@ -19,10 +19,8 @@ router = APIRouter(prefix="/rag")
     tags=["RAG"],
     summary="Pipeline RAG Completo",
 )
-def generate_rag_response(request: RAGRequest) -> RAGResponse:
-    """
-    Gera uma resposta RAG com base na requisição fornecida.
-    """
+async def generate_rag_response(request: RAGRequest) -> RAGResponse:
+    """Gera uma resposta RAG com base na requisição fornecida."""
     return {
         "answer": "RAG não implementado ainda",
         "sources": [],
