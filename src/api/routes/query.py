@@ -1,8 +1,14 @@
+"""
+API routes for handling query operations.
+
+Defines the endpoint for performing searches on the vector index.
+"""
+
 from fastapi import APIRouter, Depends
 
-from api.dependencies.vector_index import get_vector_index
-from api.schemas.query import QueryRequest, QueryResponse, QueryResult
-from vectorize.vector_index import VectorIndex
+from api.dependencies.query_service import query_search_service
+from api.schemas.query import QueryRequest, QueryResponse
+from api.services.query import QueryService
 
 # Define router
 router = APIRouter(prefix="/query")
@@ -15,25 +21,11 @@ router = APIRouter(prefix="/query")
     summary="Realiza uma consulta na base de dados vetorial.",
     response_model=QueryResponse,
 )
-def query_search(
+async def query_search(
     request: QueryRequest,
-    vector_index: VectorIndex = Depends(get_vector_index),
+    service: QueryService = Depends(query_search_service),
 ) -> QueryResponse:
-    """
-    Realiza uma consulta na base de dados vetorial usando o VectorIndex.
-    """
-    # TODO: Implementar service de search
-    # Perform search
-    res = vector_index.search(request.query, top_k=request.top_k)
+    """Realiza uma consulta na base de dados vetorial."""
+    results = service.search(query=request.query, top_k=request.top_k)
 
-    # Parse results into QueryResponse
-    parsed = [
-        QueryResult(
-            id=str(r.id),
-            score=r.score,
-            payload=r.payload,
-        )
-        for r in res
-    ]
-
-    return QueryResponse(results=parsed)
+    return QueryResponse(results=results)

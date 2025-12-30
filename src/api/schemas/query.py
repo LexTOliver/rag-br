@@ -1,9 +1,17 @@
-from typing import Any, Dict, List
+"""
+Schemas for query requests and responses.
+
+Defines the data models for handling query operations in the API.
+"""
+
+from typing import Any, Dict, Tuple
 
 from pydantic import BaseModel, Field
 
 
 class QueryRequest(BaseModel):
+    """Schema para requisição de consulta."""
+
     query: str = Field(
         ..., description="A consulta de texto para buscar na base de dados vetorial"
     )
@@ -13,6 +21,8 @@ class QueryRequest(BaseModel):
 
 
 class QueryResult(BaseModel):
+    """Schema para resultado individual da consulta."""
+
     id: str = Field(..., description="ID do trecho do documento retornado")
     score: float = Field(..., description="Pontuação de similaridade do documento")
     payload: Dict[str, Any] = Field(
@@ -21,6 +31,8 @@ class QueryResult(BaseModel):
 
 
 class QueryResponse(BaseModel):
-    results: List[QueryResult] = Field(
+    """Schema para resposta da consulta contendo os resultados."""
+
+    results: Tuple[QueryResult] = Field(
         ..., description="Lista de resultados da consulta"
     )
