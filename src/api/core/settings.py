@@ -1,7 +1,7 @@
 """
 API settings for the RAG-BR application.
 
-Defines configuration parameters such as API metadata, CORS settings,
+Defines configuration parameters such as API metadata,
 and application-specific settings like Vector Index and Qdrant paths.
 """
 
@@ -21,11 +21,6 @@ class APISettings(BaseSettings):
     # API
     host: str = Field(default="0.0.0.0", env="API_HOST")
     port: int = Field(default=8000, env="API_PORT")
-
-    # CORS settings
-    allow_origins: list[str] = Field(default=["*"], env="CORS_ALLOW_ORIGINS")
-    allow_methods: list[str] = Field(default=["*"], env="CORS_ALLOW_METHODS")
-    allow_headers: list[str] = Field(default=["*"], env="CORS_ALLOW_HEADERS")
 
     # -- APPLICATION SETTINGS
     # Vector Index
