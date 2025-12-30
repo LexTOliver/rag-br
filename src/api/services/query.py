@@ -8,6 +8,7 @@ from functools import lru_cache
 from typing import Tuple
 
 from api.schemas.query import QueryResult
+from vectorize.vector_index import VectorIndex
 
 
 class QueryService:
@@ -22,12 +23,12 @@ class QueryService:
             Performs a search on the vector index and returns the top_k results.
     """
 
-    def __init__(self, vector_index):
+    def __init__(self, vector_index: VectorIndex):
         """
         Initializes the QueryService with the provided vector index.
 
         Params:
-            vector_index: The vector index instance to be used for searching.
+            vector_index (VectorIndex): The vector index instance to be used for searching.
         """
         self.vector_index = vector_index
 
