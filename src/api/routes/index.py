@@ -1,3 +1,10 @@
+"""
+API routes for indexing documents.
+
+This module defines the FastAPI routes for handling document indexing
+requests. It uses the IndexService to process the indexing logic and
+returns appropriate responses.
+"""
 from fastapi import APIRouter, Depends
 
 from api.dependencies.index_service import get_index_service
@@ -22,11 +29,12 @@ async def index_document(
     """
     Vetoriza e indexa um novo documento na base de dados vetorial usando o VectorIndex.
     """
-    res = service.index_document(
-        document=request.document, metadata=request.metadata
-    )
+    res = service.index_document(document=request.document, metadata=request.metadata)
 
     # Return response
     return IndexResponse(
-        doc_id=res["doc_id"], status=res["status"], message=res["message"], num_chunks=res["chunks_indexed"]
+        doc_id=res["doc_id"],
+        status=res["status"],
+        message=res["message"],
+        num_chunks=res["chunks_indexed"],
     )

@@ -3,6 +3,7 @@ Dependency injection for IndexService.
 
 Provides a function to create and inject IndexService instances.
 """
+
 from api.dependencies.vector_index import get_vector_index
 from api.services.index import IndexService
 

@@ -150,7 +150,7 @@ class VectorIndex:
                     doc_id=doc_id,
                     status="skipped",
                     message="Document already indexed",
-                    chunks_indexed=chunks_found
+                    chunks_indexed=chunks_found,
                 )
 
         # Start indexing process
