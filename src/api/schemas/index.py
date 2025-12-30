@@ -1,3 +1,9 @@
+"""
+Schemas for document indexing requests and responses.
+
+This module defines the Pydantic models used for validating and serializing
+the request and response data related to document indexing operations in the API.
+"""
 from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Field

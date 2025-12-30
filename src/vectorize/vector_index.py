@@ -101,11 +101,13 @@ class VectorIndex:
         )
         self._initialized = True
 
-    def _assert_initialized(self):
+    def assert_initialized(self):
         if not self._initialized:
             raise RuntimeError(
                 "VectorIndex não inicializado. Chame `initialize()` antes de usar."
             )
+        else:
+            return True
 
     def index_document(
         self,
@@ -126,7 +128,7 @@ class VectorIndex:
             IndexResult: Resultado da operação de indexação.
         """
         # Assert initialization of components
-        self._assert_initialized()
+        self.assert_initialized()
 
         # Validate text
         if not text or not text.strip():
@@ -142,11 +144,13 @@ class VectorIndex:
 
         # Check if document is already indexed
         if skip_existing and not force_reindex:
-            if self.vector_store.document_exists(doc_id, metadata):
+            chunks_found = self.vector_store.document_exists(doc_id, metadata)
+            if chunks_found > 0:
                 return IndexResult(
                     doc_id=doc_id,
                     status="skipped",
                     message="Document already indexed",
+                    chunks_indexed=chunks_found
                 )
 
         # Start indexing process
@@ -225,7 +229,7 @@ class VectorIndex:
         Returns:
             Lista de pontos similares encontrados.
         """
-        self._assert_initialized()
+        self.assert_initialized()
 
         query_emb = self.embedder.embed([query], batch_size=1)[0]
 

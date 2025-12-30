@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from api.dependencies.vector_index import get_vector_index
-
-# from api.services.indexing import index_document_service
+from api.dependencies.index_service import get_index_service
 from api.schemas.index import IndexRequest, IndexResponse
-from vectorize.vector_index import VectorIndex
+from api.services.index import IndexService
 
 # Initialize API router
 router = APIRouter(prefix="/index")
@@ -17,22 +15,18 @@ router = APIRouter(prefix="/index")
     summary="Vetoriza e indexa novo documento.",
     response_model=IndexResponse,
 )
-def index_document(
+async def index_document(
     request: IndexRequest,
-    vector_index: VectorIndex = Depends(get_vector_index),
+    service: IndexService = Depends(get_index_service),
 ) -> IndexResponse:
     """
     Vetoriza e indexa um novo documento na base de dados vetorial usando o VectorIndex.
     """
-    # TODO: Implementar index service
-    # Vectorize and index document
-    res = vector_index.index_document(request.document, request.metadata)
-
-    # Parse status and message
-    status = "success" if res.status == "indexed" else "failure"
-    message = f"Document {res.status}. {res.message or ''}".strip()
+    res = service.index_document(
+        document=request.document, metadata=request.metadata
+    )
 
     # Return response
     return IndexResponse(
-        doc_id=res.doc_id, status=status, message=message, num_chunks=res.chunks_indexed
+        doc_id=res["doc_id"], status=res["status"], message=res["message"], num_chunks=res["chunks_indexed"]
     )

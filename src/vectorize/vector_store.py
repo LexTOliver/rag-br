@@ -188,7 +188,7 @@ class VectorStore:
 
         return results[0]
 
-    def document_exists(self, doc_id: str, metadata: Dict[str, Any]) -> bool:
+    def document_exists(self, doc_id: str, metadata: Dict[str, Any]) -> int:
         """
         Verifica se um documento já possui um vetor indexado no VectorStore.
         A verificação é feita buscando o hash e metadados associados ao documento.
@@ -197,11 +197,12 @@ class VectorStore:
             doc_id (str): ID do documento a ser verificado.
             metadata (Dict[str, Any]): Metadados do documento a ser verificado.
         Returns:
+            int: Número de vetores encontrados correspondentes ao documento.
 
         """
         # Create filter with doc_id and metadata
         filter_dict = {"doc_id": doc_id}
         filter_dict.update(metadata)
-        results = self.search_by_filter(filter=filter_dict, limit=1)
+        results = self.search_by_filter(filter=filter_dict, limit=50)
 
-        return results != []
+        return len(results)
