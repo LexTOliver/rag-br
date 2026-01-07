@@ -19,8 +19,6 @@ from vectorize.vector_index import VectorIndex
 # logger = get_logger("logs/api.log")
 # TODO: Implementar logger para api
 
-vector_index = VectorIndex()
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,7 +26,7 @@ async def lifespan(app: FastAPI):
     # STARTUP
     try:
         # logger.info("Starting RAG-BR API...")
-        global vector_index
+        vector_index = VectorIndex()
 
         # Load configuration
         config_path = settings.index_config_path
@@ -38,6 +36,7 @@ async def lifespan(app: FastAPI):
         # Initialize VectorIndex
         vector_index_config = VectorIndexConfig.from_dict(config["vector_index"])
         vector_index.initialize(vector_index_config)
+        app.state.vector_index = vector_index
         # logger.info("VectorIndex initialized!")
 
         # TODO: Initialize handlers

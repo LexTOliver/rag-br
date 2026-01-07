@@ -1,7 +1,8 @@
-from api.core.lifespan import vector_index
+from fastapi import Request
+
 from vectorize.vector_index import VectorIndex
 
 
-def get_vector_index() -> VectorIndex:
+def get_vector_index(request: Request) -> VectorIndex:
     """Dependência para obter a instância do VectorIndex."""
-    return vector_index
+    return request.app.state.vector_index
