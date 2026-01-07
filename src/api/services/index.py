@@ -39,6 +39,8 @@ class IndexService:
         Returns:
             dict: A dictionary containing the indexing result.
         """
+        # TODO: Search if it is needed to preprocess text before indexing
+
         # Vectorize and index document
         res = self.vector_index.index_document(document, metadata)
 

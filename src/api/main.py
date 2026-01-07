@@ -36,6 +36,12 @@ app.include_router(query.router)
 app.include_router(rag.router)
 # app.include_router(debug.router)
 
+# -- TODO List
+# TODO: Add customized Exceptions for API
+# TODO: Create middleware folder for customized middleware settings
+# TODO: Pesquisar/Comparar camada de serviço com handlers
+# TODO: Create debug route to test steps from VectorIndex (chunker, embedder, vector store)
+
 
 @app.get("/", tags=["Root"], summary="RAG-BR Root Endpoint")
 async def read_root():

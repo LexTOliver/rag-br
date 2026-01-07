@@ -5,6 +5,7 @@ This module defines the FastAPI routes for handling document indexing
 requests. It uses the IndexService to process the indexing logic and
 returns appropriate responses.
 """
+
 from fastapi import APIRouter, Depends
 
 from api.dependencies.index_service import get_index_service

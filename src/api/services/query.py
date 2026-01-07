@@ -44,6 +44,7 @@ class QueryService:
         Returns:
             Tuple[QueryResult]: A tuple containing the top_k search results.
         """
+        # TODO: Search if it is need to preprocess text before searching...
         result = self.vector_index.search(query, top_k=top_k)
 
         return [
